@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LaundryFlow - Order Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script defer="" src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container": "#fbebdd",
+                      "background": "#fff8f4",
+                      "on-tertiary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "inverse-on-surface": "#feeee0",
+                      "surface-muted": "#f8fafc",
+                      "on-primary-fixed-variant": "#663e00",
+                      "on-secondary-fixed": "#091d2e",
+                      "on-tertiary-fixed-variant": "#004c6b",
+                      "border-subtle": "#e2e8f0",
+                      "on-tertiary-container": "#004764",
+                      "inverse-surface": "#382f25",
+                      "on-tertiary-fixed": "#001e2d",
+                      "status-unpaid": "#ef4444",
+                      "tertiary-container": "#10bbff",
+                      "on-surface-variant": "#534434",
+                      "surface-container-high": "#f5e5d7",
+                      "on-primary-container": "#603a00",
+                      "surface-variant": "#f0e0d2",
+                      "primary": "#865300",
+                      "on-secondary-container": "#526478",
+                      "tertiary": "#00658c",
+                      "on-primary-fixed": "#2b1700",
+                      "surface-container-highest": "#f0e0d2",
+                      "surface": "#fff8f4",
+                      "on-secondary": "#ffffff",
+                      "primary-fixed-dim": "#ffb961",
+                      "secondary-fixed": "#d1e4fb",
+                      "secondary-fixed-dim": "#b5c8df",
+                      "on-primary": "#ffffff",
+                      "tertiary-fixed": "#c6e7ff",
+                      "error-container": "#ffdad6",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary": "#4e6073",
+                      "on-secondary-fixed-variant": "#36485b",
+                      "surface-tint": "#865300",
+                      "primary-fixed": "#ffddb9",
+                      "on-background": "#221a12",
+                      "inverse-primary": "#ffb961",
+                      "status-paid": "#10b981",
+                      "outline-variant": "#d8c3ad",
+                      "surface-container-low": "#fff1e6",
+                      "on-surface": "#221a12",
+                      "tertiary-fixed-dim": "#81cfff",
+                      "primary-container": "#f39c12",
+                      "error": "#ba1a1a",
+                      "surface-bright": "#fff8f4",
+                      "on-error": "#ffffff",
+                      "surface-dim": "#e7d7ca",
+                      "outline": "#867461",
+                      "secondary-container": "#cfe2f9"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-padding": "1rem",
+                      "base": "0.25rem",
+                      "section-gap": "2rem",
+                      "gutter-pos": "1.5rem"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "mono-receipt": [
+                              "Monospace"
+                      ],
+                      "body-base": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "mono-receipt": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-base": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "30px",
+                              {
+                                      "lineHeight": "36px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background font-body-base antialiased flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col p-4 space-y-2 h-screen w-64 border-r fixed left-0 top-0 border-subtle bg-surface-container-lowest font-sans text-sm tracking-wide z-30">
+<div class="mb-6 px-4">
+<h1 class="font-bold text-lg text-on-surface">LaundryFlow</h1>
+<p class="text-on-surface-variant font-body-sm">Admin Dashboard</p>
+</div>
+<button class="bg-primary-container text-on-primary w-full py-2 rounded-DEFAULT font-bold mb-4 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+            New Order
+        </button>
+<div class="flex-1 space-y-2 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary-container hover:bg-surface-variant/50 transition-all duration-200 rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Overview
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-surface-container-high text-primary-container rounded-lg font-semibold scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+                Orders
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary-container hover:bg-surface-variant/50 transition-all duration-200 rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">person</span>
+                Customers
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary-container hover:bg-surface-variant/50 transition-all duration-200 rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+                Inventory
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary-container hover:bg-surface-variant/50 transition-all duration-200 rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+                Analytics
+            </a>
+</div>
+<div class="mt-auto space-y-2 pt-4 border-t border-subtle">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary-container hover:bg-surface-variant/50 transition-all duration-200 rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary-container hover:bg-surface-variant/50 transition-all duration-200 rounded-lg scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">logout</span>
+                Logout
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col md:ml-64 h-screen">
+<!-- TopNavBar (Mobile mainly, but keeping structural adherence if needed) -->
+<header class="flex justify-between items-center h-16 px-6 sticky top-0 z-40 bg-surface-container-lowest font-sans antialiased text-sm font-medium border-b border-subtle shadow-sm md:hidden">
+<div class="flex items-center">
+<button class="mr-4 text-on-surface-variant">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="text-xl font-black tracking-tight text-primary-container">LaundryFlow</span>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<button class="hover:bg-surface-variant transition-colors active:opacity-80 duration-150 p-2 rounded-full"><span class="material-symbols-outlined">notifications</span></button>
+<button class="hover:bg-surface-variant transition-colors active:opacity-80 duration-150 p-2 rounded-full"><span class="material-symbols-outlined">help</span></button>
+<button class="hover:bg-surface-variant transition-colors active:opacity-80 duration-150 p-2 rounded-full"><span class="material-symbols-outlined">settings</span></button>
+<img alt="Manager Profile Avatar" class="w-8 h-8 rounded-full border border-subtle ml-2" data-alt="Close up portrait of a smiling manager in a bright modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfwwN-LQqXFehfRQANn5ZlALItzGG2Mzrl8e9tqIQ1GP2HXyeMdcIUveA8izcTdNG-0vD-sXQo42Y8tcQ16Zbzp6Q75gTGQmiQKvl4gbl2zNdeqSUD1e-yL5dq9sR11-UuegSAvlXMdi7QAQkG9cKMHBhrtYeGSzO3AMgBVvKHrqQJoZ1GaFz3ggszW8a30gX63Bk8SPVhySGzLJhmud0YLbcAHlpckcwx8hIq7V95_jiFYgkmRbL4usGNM5awELybQ3q9uWLbwA"/>
+</div>
+</header>
+<!-- Kanban Board Container -->
+<main class="flex-1 overflow-x-auto overflow-y-hidden p-container-padding bg-background">
+<div class="flex gap-4 h-full min-w-max pb-4">
+<!-- Column: New Order -->
+<div class="w-80 flex flex-col bg-surface-container rounded-lg border border-subtle h-full">
+<div class="p-4 border-b border-subtle flex justify-between items-center bg-surface-container-high rounded-t-lg">
+<h2 class="font-headline-md text-on-surface">New Order</h2>
+<span class="bg-surface-variant text-on-surface-variant px-2 py-1 rounded-full text-xs font-bold">2</span>
+</div>
+<div class="flex-1 overflow-y-auto p-3 space-y-3">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest p-4 rounded-DEFAULT shadow-sm border border-subtle">
+<div class="flex justify-between items-start mb-2">
+<div>
+<span class="font-label-caps text-on-surface-variant">#SL-2024-001</span>
+<h3 class="font-headline-md text-base mt-1">Budi Santoso</h3>
+</div>
+<div class="relative" x-data="{ open: false }">
+<button @click="open = !open" @click.away="open = false" class="text-on-surface-variant hover:text-on-surface rounded-full p-1 hover:bg-surface-muted transition-colors">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</button>
+<div class="absolute right-0 mt-1 w-48 bg-surface-container-lowest border border-subtle rounded-DEFAULT shadow-md z-10" style="display: none;" x-show="open">
+<a class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-muted" href="#">Update Status</a>
+<a class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-muted" href="#">Send WA Reminder</a>
+<a class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-muted" href="#">Print Label</a>
+</div>
+</div>
+</div>
+<div class="text-body-sm text-on-surface-variant mb-3">
+<p>5.0 kg / 15 items</p>
+<p class="font-bold text-on-surface mt-1">Rp 45.000</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="px-2 py-1 bg-status-unpaid/10 text-status-unpaid rounded-DEFAULT text-xs font-semibold">Unpaid</span>
+<span class="text-xs text-on-surface-variant">Today, 09:00</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest p-4 rounded-DEFAULT shadow-sm border border-subtle">
+<div class="flex justify-between items-start mb-2">
+<div>
+<span class="font-label-caps text-on-surface-variant">#SL-2024-002</span>
+<h3 class="font-headline-md text-base mt-1">Siti Aminah</h3>
+</div>
+<div class="relative" x-data="{ open: false }">
+<button @click="open = !open" @click.away="open = false" class="text-on-surface-variant hover:text-on-surface rounded-full p-1 hover:bg-surface-muted transition-colors">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</button>
+<div class="absolute right-0 mt-1 w-48 bg-surface-container-lowest border border-subtle rounded-DEFAULT shadow-md z-10" style="display: none;" x-show="open">
+<a class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-muted" href="#">Update Status</a>
+<a class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-muted" href="#">Send WA Reminder</a>
+<a class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-muted" href="#">Print Label</a>
+</div>
+</div>
+</div>
+<div class="text-body-sm text-on-surface-variant mb-3">
+<p>Bed Cover Set</p>
+<p class="font-bold text-on-surface mt-1">Rp 75.000</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="px-2 py-1 bg-status-paid/10 text-status-paid rounded-DEFAULT text-xs font-semibold">Paid</span>
+<span class="text-xs text-on-surface-variant">Today, 10:15</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column: Washing -->
+<div class="w-80 flex flex-col bg-surface-container rounded-lg border border-subtle h-full">
+<div class="p-4 border-b border-subtle flex justify-between items-center bg-surface-container-high rounded-t-lg">
+<h2 class="font-headline-md text-on-surface">Washing</h2>
+<span class="bg-surface-variant text-on-surface-variant px-2 py-1 rounded-full text-xs font-bold">1</span>
+</div>
+<div class="flex-1 overflow-y-auto p-3 space-y-3">
+<!-- Card -->
+<div class="bg-surface-container-lowest p-4 rounded-DEFAULT shadow-sm border border-subtle">
+<div class="flex justify-between items-start mb-2">
+<div>
+<span class="font-label-caps text-on-surface-variant">#SL-2024-000</span>
+<h3 class="font-headline-md text-base mt-1">Ahmad Yani</h3>
+</div>
+<div class="relative" x-data="{ open: false }">
+<button @click="open = !open" @click.away="open = false" class="text-on-surface-variant hover:text-on-surface rounded-full p-1 hover:bg-surface-muted transition-colors">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</button>
+<div class="absolute right-0 mt-1 w-48 bg-surface-container-lowest border border-subtle rounded-DEFAULT shadow-md z-10" style="display: none;" x-show="open">
+<a class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-muted" href="#">Update Status</a>
+<a class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-muted" href="#">Send WA Reminder</a>
+<a class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-muted" href="#">Print Label</a>
+</div>
+</div>
+</div>
+<div class="text-body-sm text-on-surface-variant mb-3">
+<p>3.2 kg / 10 items</p>
+<p class="font-bold text-on-surface mt-1">Rp 28.800</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="px-2 py-1 bg-status-paid/10 text-status-paid rounded-DEFAULT text-xs font-semibold">Paid</span>
+<span class="text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">local_laundry_service</span> In Machine 2</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column: Ironing -->
+<div class="w-80 flex flex-col bg-surface-container rounded-lg border border-subtle h-full">
+<div class="p-4 border-b border-subtle flex justify-between items-center bg-surface-container-high rounded-t-lg">
+<h2 class="font-headline-md text-on-surface">Ironing</h2>
+<span class="bg-surface-variant text-on-surface-variant px-2 py-1 rounded-full text-xs font-bold">0</span>
+</div>
+<div class="flex-1 overflow-y-auto p-3 space-y-3 flex items-center justify-center">
+<p class="text-on-surface-variant text-sm text-center">No orders currently ironing.</p>
+</div>
+</div>
+<!-- Column: Ready for Pickup -->
+<div class="w-80 flex flex-col bg-surface-container rounded-lg border border-subtle h-full">
+<div class="p-4 border-b border-subtle flex justify-between items-center bg-surface-container-high rounded-t-lg">
+<h2 class="font-headline-md text-on-surface">Ready for Pickup</h2>
+<span class="bg-surface-variant text-on-surface-variant px-2 py-1 rounded-full text-xs font-bold">1</span>
+</div>
+<div class="flex-1 overflow-y-auto p-3 space-y-3">
+<!-- Card -->
+<div class="bg-surface-container-lowest p-4 rounded-DEFAULT shadow-sm border border-subtle">
+<div class="flex justify-between items-start mb-2">
+<div>
+<span class="font-label-caps text-on-surface-variant">#SL-2023-998</span>
+<h3 class="font-headline-md text-base mt-1">Dewi Lestari</h3>
+</div>
+<div class="relative" x-data="{ open: false }">
+<button @click="open = !open" @click.away="open = false" class="text-on-surface-variant hover:text-on-surface rounded-full p-1 hover:bg-surface-muted transition-colors">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</button>
+<div class="absolute right-0 mt-1 w-48 bg-surface-container-lowest border border-subtle rounded-DEFAULT shadow-md z-10" style="display: none;" x-show="open">
+<a class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-muted" href="#">Update Status</a>
+<a class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-muted" href="#">Send WA Reminder</a>
+<a class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-muted" href="#">Print Label</a>
+</div>
+</div>
+</div>
+<div class="text-body-sm text-on-surface-variant mb-3">
+<p>Dry Clean - Suit</p>
+<p class="font-bold text-on-surface mt-1">Rp 65.000</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="px-2 py-1 bg-status-unpaid/10 text-status-unpaid rounded-DEFAULT text-xs font-semibold">Unpaid</span>
+<span class="text-xs text-on-surface-variant">Shelf B2</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column: Completed -->
+<div class="w-80 flex flex-col bg-surface-container rounded-lg border border-subtle h-full opacity-70">
+<div class="p-4 border-b border-subtle flex justify-between items-center bg-surface-container-high rounded-t-lg">
+<h2 class="font-headline-md text-on-surface">Completed</h2>
+<span class="bg-surface-variant text-on-surface-variant px-2 py-1 rounded-full text-xs font-bold">12</span>
+</div>
+<div class="flex-1 overflow-y-auto p-3 space-y-3">
+<p class="text-on-surface-variant text-sm text-center pt-4">Showing recent completed orders...</p>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

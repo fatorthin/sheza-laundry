@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sheza Laundry - Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script defer="" src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#fff8f4",
+                        "surface-bright": "#fff8f4",
+                        "surface-container-high": "#f5e5d7",
+                        "outline": "#867461",
+                        "on-background": "#221a12",
+                        "on-secondary-fixed": "#091d2e",
+                        "tertiary-container": "#10bbff",
+                        "secondary": "#4e6073",
+                        "on-primary-fixed-variant": "#663e00",
+                        "secondary-fixed": "#d1e4fb",
+                        "surface-tint": "#865300",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#001e2d",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#fff1e6",
+                        "status-paid": "#10b981",
+                        "primary": "#865300",
+                        "secondary-container": "#cfe2f9",
+                        "outline-variant": "#d8c3ad",
+                        "tertiary-fixed-dim": "#81cfff",
+                        "status-unpaid": "#ef4444",
+                        "background": "#fff8f4",
+                        "surface-muted": "#f8fafc",
+                        "on-primary-fixed": "#2b1700",
+                        "tertiary-fixed": "#c6e7ff",
+                        "surface-dim": "#e7d7ca",
+                        "on-secondary-container": "#526478",
+                        "inverse-primary": "#ffb961",
+                        "surface-container": "#fbebdd",
+                        "inverse-surface": "#382f25",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#00658c",
+                        "on-surface": "#221a12",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#b5c8df",
+                        "on-primary-container": "#603a00",
+                        "inverse-on-surface": "#feeee0",
+                        "border-subtle": "#e2e8f0",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#f0e0d2",
+                        "primary-container": "#f39c12",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#004764",
+                        "on-secondary-fixed-variant": "#36485b",
+                        "primary-fixed-dim": "#ffb961",
+                        "primary-fixed": "#ffddb9",
+                        "on-tertiary-fixed-variant": "#004c6b",
+                        "on-surface-variant": "#534434",
+                        "surface-variant": "#f0e0d2",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "2rem",
+                        "base": "0.25rem",
+                        "gutter-pos": "1.5rem",
+                        "container-padding": "1rem"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "mono-receipt": ["Monospace"],
+                        "label-caps": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-base": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "mono-receipt": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-base": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["30px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-base text-body-base antialiased" x-data="{ mobileMenuOpen: false }">
+<!-- App Shell Container -->
+<div class="flex h-screen overflow-hidden bg-background">
+<!-- Admin SideNavBar (Hidden on Mobile, Visible on Desktop) -->
+<nav class="h-screen w-64 border-r hidden md:flex flex-col border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex-shrink-0 z-20">
+<!-- Brand Logo -->
+<div class="h-16 flex items-center px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+<span class="text-lg font-bold text-slate-900 dark:text-white">Admin Dashboard</span>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+<!-- Active Item: Dashboard -->
+<a class="flex items-center px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 border-r-4 border-amber-600 dark:border-amber-500 cursor-pointer select-none" href="#">
+<span class="material-symbols-outlined filled mr-3 text-[20px]">dashboard</span>
+<span class="font-['Inter'] text-sm font-medium">Dashboard</span>
+</a>
+<!-- Inactive Items -->
+<a class="flex items-center px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all cursor-pointer select-none" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">receipt_long</span>
+<span class="font-['Inter'] text-sm font-medium">Orders</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all cursor-pointer select-none" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">category</span>
+<span class="font-['Inter'] text-sm font-medium">Catalog</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all cursor-pointer select-none" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">group</span>
+<span class="font-['Inter'] text-sm font-medium">Customers</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all cursor-pointer select-none" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">monitoring</span>
+<span class="font-['Inter'] text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all cursor-pointer select-none" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">settings</span>
+<span class="font-['Inter'] text-sm font-medium">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col min-w-0 bg-surface">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-4 h-16 sticky top-0 z-40 bg-white dark:bg-slate-900 shadow-sm dark:shadow-none border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center flex-1">
+<!-- Mobile Menu Button -->
+<button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 mr-2 text-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="text-xl font-black text-amber-600 dark:text-amber-500 font-['Inter'] antialiased tracking-tight md:hidden">AdminPanel</span>
+<!-- Search Bar (on_left) -->
+<div class="hidden md:flex ml-4 max-w-md w-full relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-amber-500 transition-all" placeholder="Search orders, customers..." type="text"/>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-full active:opacity-80 duration-150 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+</button>
+<button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-full active:opacity-80 duration-150">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Scrollable Canvas -->
+<main class="flex-1 overflow-y-auto p-4 md:p-8">
+<div class="max-w-7xl mx-auto space-y-6 pb-20 md:pb-0">
+<!-- Header -->
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Overview</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Welcome back. Here's what's happening today.</p>
+</div>
+<!-- KPI Cards Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="bg-surface-container rounded-xl p-6 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary-container opacity-20 rounded-full group-hover:scale-110 transition-transform duration-300"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">New Orders</span>
+<span class="material-symbols-outlined text-primary-container">local_laundry_service</span>
+</div>
+<div class="relative z-10">
+<span class="font-headline-lg text-headline-lg text-on-surface">42</span>
+<span class="font-body-sm text-body-sm text-status-paid ml-2 font-medium">+12%</span>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl p-6 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-tertiary-container opacity-20 rounded-full group-hover:scale-110 transition-transform duration-300"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">Revenue Today</span>
+<span class="material-symbols-outlined text-tertiary">payments</span>
+</div>
+<div class="relative z-10">
+<span class="font-headline-lg text-headline-lg text-on-surface">$1,240</span>
+<span class="font-body-sm text-body-sm text-status-paid ml-2 font-medium">+5%</span>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl p-6 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-error-container opacity-50 rounded-full group-hover:scale-110 transition-transform duration-300"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">Pending Pickup</span>
+<span class="material-symbols-outlined text-error">schedule</span>
+</div>
+<div class="relative z-10">
+<span class="font-headline-lg text-headline-lg text-on-surface">8</span>
+<span class="font-body-sm text-body-sm text-status-unpaid ml-2 font-medium">Needs attention</span>
+</div>
+</div>
+</div>
+<!-- Recent Orders List -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle overflow-hidden">
+<div class="px-6 py-4 border-b border-border-subtle flex justify-between items-center bg-surface-muted">
+<h2 class="font-headline-md text-headline-md text-on-surface">Recent Orders</h2>
+<button class="text-primary font-body-sm text-body-sm font-medium hover:underline">View All</button>
+</div>
+<div class="divide-y divide-border-subtle">
+<!-- Order Item -->
+<div class="p-4 hover:bg-surface-muted transition-colors flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold font-body-sm text-body-sm">
+                                        JD
+                                    </div>
+<div>
+<p class="font-body-base text-body-base font-semibold text-on-surface">John Doe</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Order #1042 • Wash &amp; Fold</p>
+</div>
+</div>
+<div class="text-right">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps">
+                                        Processing
+                                    </span>
+<p class="font-body-sm text-body-sm text-on-surface mt-1 font-medium">$45.00</p>
+</div>
+</div>
+<!-- Order Item -->
+<div class="p-4 hover:bg-surface-muted transition-colors flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center font-bold font-body-sm text-body-sm">
+                                        AS
+                                    </div>
+<div>
+<p class="font-body-base text-body-base font-semibold text-on-surface">Alice Smith</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Order #1041 • Dry Cleaning</p>
+</div>
+</div>
+<div class="text-right">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-green-100 text-status-paid font-label-caps text-label-caps">
+                                        Ready
+                                    </span>
+<p class="font-body-sm text-body-sm text-on-surface mt-1 font-medium">$28.50</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+<!-- Customer BottomNavBar (Mobile Only) -->
+<!-- Assuming this screen represents a "Home" or "Dashboard" intent, mapping to "Home" tab -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 px-2 pb-safe bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-t-2xl shadow-[0_-4px_10px_rgba(0,0,0,0.05)] border-t border-slate-100 dark:border-slate-800">
+<!-- Active Item: Home -->
+<a class="flex flex-col items-center justify-center text-amber-600 dark:text-amber-500 scale-110 active:bg-slate-50 dark:active:bg-slate-800 transform scale-95 duration-75 w-16 h-full rounded-lg" href="#">
+<span class="material-symbols-outlined filled text-[24px] mb-1">home</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-wider">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 active:bg-slate-50 dark:active:bg-slate-800 w-16 h-full rounded-lg" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">search</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-wider">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 active:bg-slate-50 dark:active:bg-slate-800 w-16 h-full rounded-lg relative" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">shopping_cart</span>
+<span class="absolute top-2 right-4 w-2 h-2 bg-amber-500 rounded-full"></span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-wider">Cart</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 active:bg-slate-50 dark:active:bg-slate-800 w-16 h-full rounded-lg" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">receipt</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-wider">Status</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 active:bg-slate-50 dark:active:bg-slate-800 w-16 h-full rounded-lg" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">person</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-wider">Account</span>
+</a>
+</nav>
+<!-- Mobile Sidebar Drawer (Alpine.js controlled) -->
+<div class="md:hidden fixed inset-0 z-50 flex" x-cloak="" x-show="mobileMenuOpen">
+<div @click="mobileMenuOpen = false" class="fixed inset-0 bg-black/50" x-show="mobileMenuOpen" x-transition.opacity=""></div>
+<nav class="relative w-64 max-w-sm h-full bg-slate-50 dark:bg-slate-950 shadow-xl flex flex-col" x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-end="translate-x-0" x-transition:enter-start="-translate-x-full" x-transition:leave="transition ease-in duration-200 transform" x-transition:leave-end="-translate-x-full" x-transition:leave-start="translate-x-0">
+<div class="h-16 flex items-center px-6 py-4 border-b border-slate-200 dark:border-slate-800 justify-between">
+<span class="text-lg font-bold text-slate-900 dark:text-white">Admin Dashboard</span>
+<button @click="mobileMenuOpen = false" class="text-slate-500">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+<a class="flex items-center px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 border-r-4 border-amber-600 dark:border-amber-500" href="#">
+<span class="material-symbols-outlined filled mr-3 text-[20px]">dashboard</span>
+<span class="font-['Inter'] text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">receipt_long</span>
+<span class="font-['Inter'] text-sm font-medium">Orders</span>
+</a>
+</div>
+</nav>
+</div>
+</body></html>

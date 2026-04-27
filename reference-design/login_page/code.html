@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login - Sheza Laundry</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#865300",
+                        "primary-container": "#f39c12",
+                        "on-secondary-container": "#526478",
+                        "on-secondary-fixed": "#091d2e",
+                        "tertiary-fixed": "#c6e7ff",
+                        "on-tertiary-container": "#004764",
+                        "surface-bright": "#fff8f4",
+                        "primary-fixed-dim": "#ffb961",
+                        "error": "#ba1a1a",
+                        "outline": "#867461",
+                        "background": "#fff8f4",
+                        "surface-tint": "#865300",
+                        "secondary-container": "#cfe2f9",
+                        "surface-container-high": "#f5e5d7",
+                        "inverse-primary": "#ffb961",
+                        "secondary": "#4e6073",
+                        "on-primary-container": "#603a00",
+                        "tertiary": "#00658c",
+                        "surface-dim": "#e7d7ca",
+                        "on-primary-fixed": "#2b1700",
+                        "secondary-fixed-dim": "#b5c8df",
+                        "inverse-on-surface": "#feeee0",
+                        "surface-container-low": "#fff1e6",
+                        "surface": "#fff8f4",
+                        "surface-variant": "#f0e0d2",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#d1e4fb",
+                        "on-background": "#221a12",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#534434",
+                        "border-subtle": "#e2e8f0",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#81cfff",
+                        "outline-variant": "#d8c3ad",
+                        "inverse-surface": "#382f25",
+                        "on-error": "#ffffff",
+                        "status-paid": "#10b981",
+                        "on-primary-fixed-variant": "#663e00",
+                        "status-unpaid": "#ef4444",
+                        "tertiary-container": "#10bbff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-muted": "#f8fafc",
+                        "on-secondary-fixed-variant": "#36485b",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#001e2d",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#ffddb9",
+                        "surface-container-highest": "#f0e0d2",
+                        "surface-container": "#fbebdd",
+                        "on-tertiary-fixed-variant": "#004c6b",
+                        "on-surface": "#221a12"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "2rem",
+                        "container-padding": "1rem",
+                        "base": "0.25rem",
+                        "gutter-pos": "1.5rem"
+                    },
+                    "fontFamily": {
+                        "mono-receipt": ["Monospace"],
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-base": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "mono-receipt": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["30px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-base": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex antialiased">
+<!-- Split Layout Container -->
+<div class="flex flex-1 flex-col md:flex-row w-full h-screen">
+<!-- Left Column: Form Canvas -->
+<div class="flex-1 flex flex-col justify-center items-center p-8 bg-surface-bright relative z-10 w-full md:w-1/2">
+<!-- Login Card (Glass/Bento style on mobile, solid on desktop) -->
+<div class="w-full max-w-md bg-surface-container-lowest rounded-xl shadow-lg p-8 md:p-10 border border-surface-container-high relative overflow-hidden">
+<!-- Decorative top bar indicating brand -->
+<div class="absolute top-0 left-0 w-full h-1.5 bg-primary-container"></div>
+<!-- Header -->
+<div class="text-center mb-10">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-container mb-4">
+<span class="material-symbols-outlined text-primary-container text-3xl" style="font-variation-settings: 'FILL' 1;">
+                            local_laundry_service
+                        </span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight mb-2">Sheza Laundry</h1>
+<p class="font-body-base text-body-base text-on-surface-variant">Sign in to your account</p>
+</div>
+<!-- Form -->
+<form action="#" class="space-y-6" method="POST">
+<!-- Email/Phone Field -->
+<div class="space-y-1.5">
+<label class="block font-label-caps text-label-caps text-on-surface" for="identifier">Email or Phone Number</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">person</span>
+</div>
+<input autocomplete="username" class="appearance-none block w-full pl-10 pr-3 py-3 border border-outline-variant rounded-lg font-body-base text-body-base text-on-surface placeholder-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container bg-surface-container-lowest transition-colors" id="identifier" name="identifier" placeholder="Enter your email or phone" required="" type="text"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-1.5">
+<label class="block font-label-caps text-label-caps text-on-surface" for="password">Password</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">lock</span>
+</div>
+<input autocomplete="current-password" class="appearance-none block w-full pl-10 pr-10 py-3 border border-outline-variant rounded-lg font-body-base text-body-base text-on-surface placeholder-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container bg-surface-container-lowest transition-colors" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
+<span class="material-symbols-outlined text-on-surface-variant text-sm hover:text-primary transition-colors">visibility_off</span>
+</div>
+</div>
+</div>
+<!-- Options Row -->
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<input class="h-4 w-4 text-primary-container focus:ring-primary-container border-outline-variant rounded text-primary-container focus:ring-offset-surface-container-lowest" id="remember-me" name="remember-me" type="checkbox"/>
+<label class="ml-2 block font-body-sm text-body-sm text-on-surface-variant" for="remember-me">
+                                Remember me
+                            </label>
+</div>
+<div class="text-sm">
+<a class="font-body-sm text-body-sm font-medium text-primary hover:text-primary-container transition-colors" href="#">
+                                Forgot Password?
+                            </a>
+</div>
+</div>
+<!-- Submit Button -->
+<div>
+<button class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-headline-md text-headline-md text-on-primary bg-primary-container hover:bg-primary-fixed-dim focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-container transition-all active:scale-[0.98]" type="submit">
+                            Login
+                        </button>
+</div>
+</form>
+<!-- Footer Links -->
+<div class="mt-8 pt-6 border-t border-surface-container-high text-center">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Don't have an account? 
+                        <a class="font-medium text-primary hover:text-primary-container transition-colors" href="#">Sign up</a>
+</p>
+</div>
+</div>
+<!-- Bottom utility links (minimal) -->
+<div class="mt-8 flex gap-4 font-body-sm text-body-sm text-on-surface-variant opacity-70">
+<a class="hover:text-primary transition-colors" href="#">Staff Login</a>
+<span>•</span>
+<a class="hover:text-primary transition-colors" href="#">Support</a>
+</div>
+</div>
+<!-- Right Column: Image Canvas (Hidden on small screens) -->
+<div class="hidden md:flex flex-1 relative bg-surface-container-high overflow-hidden shadow-inner">
+<!-- Background Image -->
+<img alt="Stack of neatly folded, crisp white towels and fresh linens in a modern laundry setting with soft warm natural lighting" class="absolute inset-0 w-full h-full object-cover object-center opacity-90" data-alt="Stack of neatly folded, crisp white towels and fresh linens in a modern laundry setting with soft warm natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBF50yj0gW4eL42oGXsJ8AuL-URnQFBwErgYn7EABpZPgjIZx9byl7xsb_Q1tdf3r6dVcCcPeLf-JCWt3jmaEqaWxx1HB1vB2ltbGGdP5rotGYqW0u4PTuuArcGo5QK6MX1GwnecpURVhdh6KXX9__CXucLFV_falx0QGIgGLDDAVaqMJB2rFzYk1ipkN2PcnLsprau_cIt2FD0b-u6SSEJDT04kqyfz127naFsr2zQLGl2SPh6Q91MgLxxY8Jcm3DMY34XILtQNg"/>
+<!-- Overlay to ensure brand coloring and text legibility -->
+<div class="absolute inset-0 bg-primary/20 mix-blend-multiply"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary-fixed/90 via-primary-fixed/40 to-transparent"></div>
+<!-- Optional marketing copy overlay -->
+<div class="relative z-10 w-full flex flex-col justify-end p-12 lg:p-24 text-on-primary-fixed">
+<div class="bg-surface-container-lowest/80 backdrop-blur-md p-8 rounded-xl border border-surface-bright/50 inline-block max-w-lg">
+<h2 class="font-headline-lg text-headline-lg mb-4 text-primary">Freshness Delivered.</h2>
+<p class="font-body-base text-body-base text-on-surface-variant">Experience premium care for your garments with Sheza Laundry. Fast, reliable, and professional service tailored for you.</p>
+</div>
+</div>
+</div>
+</div>
+</body></html>

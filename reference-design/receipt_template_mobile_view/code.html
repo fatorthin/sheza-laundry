@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Thermal Receipt Preview - Sheza Laundry</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        /* Fallback monospace font if Monospace generic fails */
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#e7d7ca",
+                        "secondary-fixed": "#d1e4fb",
+                        "primary-container": "#f39c12",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#534434",
+                        "on-tertiary-container": "#004764",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#001e2d",
+                        "on-surface": "#221a12",
+                        "error": "#ba1a1a",
+                        "on-error": "#ffffff",
+                        "outline-variant": "#d8c3ad",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#f0e0d2",
+                        "on-secondary-fixed": "#091d2e",
+                        "inverse-surface": "#382f25",
+                        "primary-fixed": "#ffddb9",
+                        "on-secondary-container": "#526478",
+                        "inverse-primary": "#ffb961",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#fbebdd",
+                        "secondary": "#4e6073",
+                        "background": "#fff8f4",
+                        "on-tertiary-fixed-variant": "#004c6b",
+                        "on-secondary-fixed-variant": "#36485b",
+                        "surface-container-high": "#f5e5d7",
+                        "surface-muted": "#f8fafc",
+                        "primary-fixed-dim": "#ffb961",
+                        "tertiary-fixed-dim": "#81cfff",
+                        "primary": "#865300",
+                        "on-background": "#221a12",
+                        "surface-tint": "#865300",
+                        "surface": "#fff8f4",
+                        "on-primary-container": "#603a00",
+                        "on-primary-fixed": "#2b1700",
+                        "secondary-container": "#cfe2f9",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#feeee0",
+                        "tertiary-fixed": "#c6e7ff",
+                        "secondary-fixed-dim": "#b5c8df",
+                        "surface-container-low": "#fff1e6",
+                        "border-subtle": "#e2e8f0",
+                        "tertiary": "#00658c",
+                        "outline": "#867461",
+                        "surface-bright": "#fff8f4",
+                        "status-unpaid": "#ef4444",
+                        "tertiary-container": "#10bbff",
+                        "status-paid": "#10b981",
+                        "on-primary-fixed-variant": "#663e00",
+                        "surface-variant": "#f0e0d2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding": "1rem",
+                        "base": "0.25rem",
+                        "gutter-pos": "1.5rem",
+                        "section-gap": "2rem"
+                    },
+                    "fontFamily": {
+                        "mono-receipt": [
+                            "'Courier Prime'", "Monospace"
+                        ],
+                        "headline-lg": [
+                            "Inter"
+                        ],
+                        "label-caps": [
+                            "Inter"
+                        ],
+                        "body-base": [
+                            "Inter"
+                        ],
+                        "body-sm": [
+                            "Inter"
+                        ],
+                        "headline-md": [
+                            "Inter"
+                        ]
+                    },
+                    "fontSize": {
+                        "mono-receipt": [
+                            "13px",
+                            {
+                                "lineHeight": "18px",
+                                "fontWeight": "400"
+                            }
+                        ],
+                        "headline-lg": [
+                            "30px",
+                            {
+                                "lineHeight": "36px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                            }
+                        ],
+                        "label-caps": [
+                            "12px",
+                            {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "600"
+                            }
+                        ],
+                        "body-base": [
+                            "16px",
+                            {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                            }
+                        ],
+                        "body-sm": [
+                            "14px",
+                            {
+                                "lineHeight": "20px",
+                                "fontWeight": "400"
+                            }
+                        ],
+                        "headline-md": [
+                            "20px",
+                            {
+                                "lineHeight": "28px",
+                                "fontWeight": "600"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-muted min-h-screen flex items-center justify-center p-4">
+<!-- Digital Screen Preview Wrapper -->
+<div class="relative flex flex-col items-center w-full max-w-md mx-auto">
+<!-- Action Header for Preview Context (Optional, adds realism to 'preview') -->
+<div class="w-[384px] flex justify-between items-center mb-4 px-2 font-body-sm text-on-surface-variant">
+<span>Preview Mode</span>
+<div class="flex gap-4">
+<button class="flex items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">print</span>
+<span>Print</span>
+</button>
+<button class="flex items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">share</span>
+<span>Share</span>
+</button>
+</div>
+</div>
+<!-- The Thermal Receipt -->
+<!-- 384px mimics roughly 80mm paper width in standard DPIs -->
+<div class="bg-surface-container-lowest w-full max-w-[384px] shadow-2xl p-6 flex flex-col gap-5 font-mono-receipt text-mono-receipt text-on-surface">
+<!-- Store Header -->
+<div class="flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-4xl mb-2" data-weight="fill" style="font-variation-settings: 'FILL' 1;">local_laundry_service</span>
+<div class="font-bold text-[16px] leading-[20px] uppercase tracking-widest mb-1">Sheza Laundry</div>
+<div class="uppercase">Main Branch #01</div>
+<div>123 Clean Street Avenue</div>
+<div>Metropolis, NY 10001</div>
+<div>Tel: (555) 019-8273</div>
+<div>VAT: 12-3456789</div>
+</div>
+<div class="border-t border-dashed border-on-surface/50 w-full"></div>
+<!-- Order Meta Data -->
+<div class="flex flex-col gap-1 w-full">
+<div class="flex justify-between w-full">
+<span>Order ID:</span>
+<span class="font-bold">ORD-2489-XY</span>
+</div>
+<div class="flex justify-between w-full">
+<span>Date:</span>
+<span>2023-10-27 14:32</span>
+</div>
+<div class="flex justify-between w-full">
+<span>Cashier:</span>
+<span>Admin</span>
+</div>
+<div class="flex justify-between w-full">
+<span>Customer:</span>
+<span class="uppercase">Sarah Jenkins</span>
+</div>
+</div>
+<div class="border-t border-dashed border-on-surface/50 w-full"></div>
+<!-- Itemized Table -->
+<div class="flex flex-col w-full">
+<!-- Table Header -->
+<div class="flex w-full font-bold pb-2 uppercase border-b border-dashed border-on-surface/50 mb-2">
+<div class="w-[15%] text-left">Qty</div>
+<div class="w-[50%] text-left">Item</div>
+<div class="w-[15%] text-right">Unit</div>
+<div class="w-[20%] text-right">Amt</div>
+</div>
+<!-- Table Rows -->
+<div class="flex flex-col gap-2">
+<div class="flex w-full items-start">
+<div class="w-[15%] text-left pt-[2px]">2x</div>
+<div class="w-[50%] text-left flex flex-col">
+<span>Men's Shirt</span>
+<span class="text-[10px] leading-[14px] text-on-surface/70">Wash &amp; Iron</span>
+</div>
+<div class="w-[15%] text-right pt-[2px]">4.50</div>
+<div class="w-[20%] text-right pt-[2px]">9.00</div>
+</div>
+<div class="flex w-full items-start">
+<div class="w-[15%] text-left pt-[2px]">1x</div>
+<div class="w-[50%] text-left flex flex-col">
+<span>Two-Piece Suit</span>
+<span class="text-[10px] leading-[14px] text-on-surface/70">Dry Clean Only</span>
+</div>
+<div class="w-[15%] text-right pt-[2px]">18.00</div>
+<div class="w-[20%] text-right pt-[2px]">18.00</div>
+</div>
+<div class="flex w-full items-start">
+<div class="w-[15%] text-left pt-[2px]">3x</div>
+<div class="w-[50%] text-left flex flex-col">
+<span>Bed Sheets (Q)</span>
+<span class="text-[10px] leading-[14px] text-on-surface/70">Wash &amp; Fold</span>
+</div>
+<div class="w-[15%] text-right pt-[2px]">5.00</div>
+<div class="w-[20%] text-right pt-[2px]">15.00</div>
+</div>
+</div>
+</div>
+<div class="border-t border-dashed border-on-surface/50 w-full mt-2"></div>
+<!-- Totals Section -->
+<div class="flex flex-col gap-1 w-full pl-8">
+<div class="flex justify-between w-full">
+<span>Subtotal:</span>
+<span>42.00</span>
+</div>
+<div class="flex justify-between w-full">
+<span>Tax (8.5%):</span>
+<span>3.57</span>
+</div>
+<div class="flex justify-between w-full">
+<span>Discount:</span>
+<span>0.00</span>
+</div>
+<div class="border-t border-dashed border-on-surface/30 w-full my-1"></div>
+<div class="flex justify-between w-full font-bold text-[16px] leading-[20px]">
+<span>TOTAL:</span>
+<span>$45.57</span>
+</div>
+</div>
+<div class="border-t border-dashed border-on-surface/50 w-full mt-2"></div>
+<!-- Payment Info -->
+<div class="flex flex-col gap-1 w-full uppercase">
+<div class="flex justify-between w-full">
+<span>Paid By:</span>
+<span>Credit Card</span>
+</div>
+<div class="flex justify-between w-full">
+<span>Auth Code:</span>
+<span>A93B2X</span>
+</div>
+</div>
+<!-- Footer & QR -->
+<div class="flex flex-col items-center text-center gap-4 mt-4">
+<div class="flex flex-col items-center">
+<span class="font-bold uppercase">Thank you for your business!</span>
+<span>Please retain this receipt for collection.</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="text-[10px] leading-[14px]">Scan to check order status:</span>
+<!-- Simulated QR Code Container -->
+<div class="w-32 h-32 border-2 border-on-surface p-1 flex items-center justify-center bg-white">
+<span class="material-symbols-outlined text-[80px] text-on-surface opacity-80" data-weight="fill">qr_code_2</span>
+</div>
+<span class="font-bold tracking-widest mt-1">S-LND-2489</span>
+</div>
+<div class="text-[10px] leading-[12px] text-on-surface/60 mt-4">
+                    Software provided by ShezaPOS v2.4.1<br/>
+                    www.shezalaundry.com
+                </div>
+</div>
+</div>
+</div>
+</body></html>

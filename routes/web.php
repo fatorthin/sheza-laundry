@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/profil', [LandingController::class, 'profil'])->name('profil');
 
 // Auth routes (manual)
 Route::middleware('guest')->group(function () {

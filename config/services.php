@@ -35,4 +35,21 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | WhatsApp Gateway (go-whatsapp-web-multidevice)
+    |--------------------------------------------------------------------------
+    |
+    | WHATSAPP_GATEWAY_URL  : base URL of your GOWA instance
+    |                          e.g. https://wagateway.surakana.my.id
+    | WHATSAPP_GATEWAY_AUTH : optional "user:password" for Basic Auth
+    |                          leave empty if no auth is configured
+    |
+    */
+    'whatsapp' => [
+        'url'        => env('WHATSAPP_GATEWAY_URL', ''),
+        'basic_auth' => env('WHATSAPP_GATEWAY_AUTH', ''),
+        'device_id'  => env('WHATSAPP_DEVICE_ID', ''),
+    ],
+
 ];

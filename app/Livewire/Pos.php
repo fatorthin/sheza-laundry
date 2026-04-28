@@ -16,7 +16,6 @@ class Pos extends Component
     public string $searchService = '';
     public string $searchMember = '';
     public ?int $selectedMemberId = null;
-    public string $paymentMethod = 'tunai';
     public bool $showMemberSearch = false;
     public bool $showSuccessModal = false;
     public ?int $lastOrderId = null;
@@ -66,13 +65,13 @@ class Pos extends Component
     #[Computed]
     public function tax(): float
     {
-        return round($this->subtotal * 0.11, 2);
+        return 0;
     }
 
     #[Computed]
     public function total(): float
     {
-        return $this->subtotal + $this->tax;
+        return $this->subtotal;
     }
 
     public function addService(int $serviceId): void
@@ -139,7 +138,6 @@ class Pos extends Component
     {
         $this->cart = [];
         $this->selectedMemberId = null;
-        $this->paymentMethod = 'tunai';
     }
 
     public function processOrder(): void
@@ -151,7 +149,6 @@ class Pos extends Component
 
         $hasKiloan = $this->hasKiloan;
         $subtotal  = $this->subtotal;
-        $tax       = $this->tax;
         $total     = $this->total;
 
         $order = Order::create([
@@ -160,10 +157,10 @@ class Pos extends Component
             'user_id'        => Auth::id(),
             'status'         => 'baru',
             'payment_status' => $hasKiloan ? 'belum_bayar' : 'belum_bayar',
-            'payment_method' => $this->paymentMethod,
+            'payment_method' => null,
             'has_kiloan'     => $hasKiloan,
             'subtotal'       => $subtotal,
-            'tax'            => $tax,
+            'tax'            => 0,
             'total'          => $total,
         ]);
 

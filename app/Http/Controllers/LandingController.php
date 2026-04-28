@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Service;
-use Illuminate\Http\Request;
 
 class LandingController extends Controller
 {
@@ -11,5 +10,10 @@ class LandingController extends Controller
     {
         $services = Service::where('is_active', true)->orderBy('sort_order')->get();
         return view('landing', compact('services'));
+    }
+
+    public function profil()
+    {
+        return view('profil');
     }
 }

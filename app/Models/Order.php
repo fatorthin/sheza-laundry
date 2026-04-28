@@ -93,7 +93,14 @@ class Order extends Model
     public function recalculate(): void
     {
         $subtotal = $this->items->sum(fn($item) => $item->subtotal ?? 0);
-        $tax = round($subtotal * 0.11, 2);
-        $this->update(['subtotal' => $subtotal, 'tax' => $tax, 'total' => $subtotal + $tax]);
+        $this->update(['subtotal' => $subtotal, 'tax' => 0, 'total' => $subtotal]);
+    }
+
+    public function recalculateTotal()
+    {
+        $this->subtotal = $this->items->sum('subtotal');
+        $this->tax = 0;
+        $this->total = $this->subtotal;
+        $this->save();
     }
 }

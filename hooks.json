@@ -1,0 +1,7 @@
+[
+  {
+    "id": "deploy-sheza",
+    "execute-command": "/DATA/AppData/sheza-laundry/deploy.sh",
+    "command-working-directory": "/DATA/AppData/sheza-laundry"
+  }
+]

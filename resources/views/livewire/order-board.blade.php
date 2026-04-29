@@ -2,7 +2,7 @@
     {{-- Header --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
         <div>
-            <h1 class="text-xl font-bold">Manajemen Orderzzzzz</h1>
+            <h1 class="text-xl font-bold">Manajemen Order</h1>
             <p class="text-sm text-on-surface-variant">Pantau dan kelola status pesanan laundry</p>
         </div>
         <div class="flex flex-col lg:flex-row lg:items-center gap-2">

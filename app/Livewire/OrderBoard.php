@@ -2,9 +2,9 @@
 
 namespace App\Livewire;
 
+use App\Jobs\SendWhatsAppNotification;
 use App\Models\Member;
 use App\Models\Order;
-use App\Services\WhatsAppService;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -21,11 +21,11 @@ class OrderBoard extends Component
     ];
 
     public array $statuses = [
-        'baru'         => 'Baru',
-        'dicuci'       => 'Dicuci',
-        'disetrika'    => 'Disetrika',
+        'baru' => 'Baru',
+        'dicuci' => 'Dicuci',
+        'disetrika' => 'Disetrika',
         'siap_diambil' => 'Siap Diambil',
-        'selesai'      => 'Selesai',
+        'selesai' => 'Selesai',
     ];
 
     #[Computed]
@@ -73,15 +73,17 @@ class OrderBoard extends Component
             $order->update(['picked_up_at' => now()]);
         }
 
-        // WhatsApp notification
+        // WhatsApp notification (dispatched to queue — non-blocking)
         $phone = $order->member?->phone;
         if ($phone) {
-            $wa = app(WhatsAppService::class);
             if ($newStatus === 'siap_diambil') {
-                $wa->notifyReadyForPickupWithInvoice($phone, $order);
+                SendWhatsAppNotification::dispatch('ready_pickup', $phone, $order);
             } else {
                 $statusLabel = $this->statuses[$newStatus] ?? $newStatus;
-                $wa->notifyOrderStatus($phone, $order->order_number, $statusLabel);
+                SendWhatsAppNotification::dispatch('status', $phone, null, [
+                    'order_number' => $order->order_number,
+                    'status_label' => $statusLabel,
+                ]);
             }
         }
     }
@@ -106,14 +108,13 @@ class OrderBoard extends Component
             'picked_up_at' => now(),
         ]);
 
-        // WhatsApp notification
+        // WhatsApp notification (dispatched to queue — non-blocking)
         $phone = $order->member?->phone;
         if ($phone) {
-            app(WhatsAppService::class)->notifyOrderCompleted(
-                $phone,
-                $order->order_number,
-                $paymentMethod
-            );
+            SendWhatsAppNotification::dispatch('completed', $phone, null, [
+                'order_number' => $order->order_number,
+                'payment_method' => $paymentMethod,
+            ]);
         }
     }
 

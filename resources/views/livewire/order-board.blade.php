@@ -3,34 +3,39 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
         <div>
             <h1 class="text-xl font-bold">Manajemen Order</h1>
-            <p class="text-sm text-on-surface-variant">Pantau dan kelola status pesanan laundry</p>
+            <p class="text-sm text-on-surface-variant">Pantau dan kelola status pesanan laundrymu</p>
         </div>
         <div class="flex flex-col lg:flex-row lg:items-center gap-2">
             <div class="relative w-full lg:w-48">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
                 </div>
-                <input wire:model.live.debounce.400ms="search" type="text" placeholder="Cari order..." class="h-10 pl-10 pr-4 border border-outline-variant rounded-xl text-sm focus:ring-2 focus:ring-primary-container focus:outline-none bg-white w-full">
+                <input wire:model.live.debounce.400ms="search" type="text" placeholder="Cari order..."
+                    class="h-10 pl-10 pr-4 border border-outline-variant rounded-xl text-sm focus:ring-2 focus:ring-primary-container focus:outline-none bg-white w-full">
             </div>
-            <select wire:model.live="filterPayment" class="h-10 border border-outline-variant rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:outline-none bg-white w-full lg:w-40">
+            <select wire:model.live="filterPayment"
+                class="h-10 border border-outline-variant rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:outline-none bg-white w-full lg:w-40">
                 <option value="">Semua Pembayaran</option>
                 <option value="belum_bayar">Belum Bayar</option>
                 <option value="lunas">Lunas</option>
             </select>
-            <select wire:model.live="filterStatus" class="h-10 border border-outline-variant rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:outline-none bg-white w-full lg:w-36">
+            <select wire:model.live="filterStatus"
+                class="h-10 border border-outline-variant rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:outline-none bg-white w-full lg:w-36">
                 <option value="">Semua Status</option>
                 @foreach ($statuses as $statusVal => $statusLabel)
                     <option value="{{ $statusVal }}">{{ $statusLabel }}</option>
                 @endforeach
             </select>
-            <select wire:model.live="filterMember" class="h-10 border border-outline-variant rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:outline-none bg-white w-full lg:w-40">
+            <select wire:model.live="filterMember"
+                class="h-10 border border-outline-variant rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:outline-none bg-white w-full lg:w-40">
                 <option value="">Semua Pelanggan</option>
                 <option value="guest">Tamu</option>
                 @foreach ($this->membersForFilter as $member)
                     <option value="{{ $member->id }}">{{ $member->name }}</option>
                 @endforeach
             </select>
-            <a href="{{ route('admin.pos') }}" class="h-10 w-full lg:w-auto flex items-center justify-center gap-1 px-4 py-2 bg-primary-container text-white rounded-xl text-sm font-medium hover:bg-[#e08e0b] whitespace-nowrap">
+            <a href="{{ route('admin.pos') }}"
+                class="h-10 w-full lg:w-auto flex items-center justify-center gap-1 px-4 py-2 bg-primary-container text-white rounded-xl text-sm font-medium hover:bg-[#e08e0b] whitespace-nowrap">
                 <span class="material-symbols-outlined text-[18px]">add</span>
                 <span>Order Baru</span>
             </a>
@@ -86,15 +91,20 @@
             <div class="min-w-0 flex flex-col" x-data="{ showAll: false }">
                 {{-- Column header --}}
                 <div class="flex items-center gap-2 mb-3">
-                    <span class="material-symbols-outlined {{ $c['icon'] }} text-[18px] filled">{{ $cfg['icon'] }}</span>
+                    <span
+                        class="material-symbols-outlined {{ $c['icon'] }} text-[18px] filled">{{ $cfg['icon'] }}</span>
                     <span class="font-semibold text-sm">{{ $cfg['label'] }}</span>
-                    <span class="{{ $c['badge'] }} text-xs font-bold px-2 py-0.5 rounded-full ml-auto">{{ $orders->count() }}</span>
+                    <span
+                        class="{{ $c['badge'] }} text-xs font-bold px-2 py-0.5 rounded-full ml-auto">{{ $orders->count() }}</span>
                 </div>
 
                 {{-- Cards --}}
                 <div class="flex-1 {{ $c['col'] }} rounded-2xl border p-3 space-y-3 min-h-32">
                     @forelse($orders as $order)
-                        <div wire:key="order-{{ $order->id }}-{{ $status }}" @if ($loop->index >= $colLimit) x-show="showAll" x-cloak @endif class="bg-white rounded-xl p-3 shadow-sm border border-outline-variant group hover:shadow-md transition-shadow" x-data="{ open: false }">
+                        <div wire:key="order-{{ $order->id }}-{{ $status }}"
+                            @if ($loop->index >= $colLimit) x-show="showAll" x-cloak @endif
+                            class="bg-white rounded-xl p-3 shadow-sm border border-outline-variant group hover:shadow-md transition-shadow"
+                            x-data="{ open: false }">
                             {{-- Card header --}}
                             <div class="flex items-start justify-between mb-2">
                                 <div>
@@ -104,14 +114,17 @@
                                 </div>
                                 <div class="flex items-center gap-1">
                                     @if ($order->is_express)
-                                        <span class="text-[9px] bg-primary-container text-white px-1.5 py-0.5 rounded-full font-bold">EXPRESS</span>
+                                        <span
+                                            class="text-[9px] bg-primary-container text-white px-1.5 py-0.5 rounded-full font-bold">EXPRESS</span>
                                     @endif
-                                    <span class="text-[9px] px-1.5 py-0.5 rounded-full font-bold
+                                    <span
+                                        class="text-[9px] px-1.5 py-0.5 rounded-full font-bold
                 {{ $order->payment_status === 'lunas' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600' }}">
                                         {{ $order->payment_status === 'lunas' ? '✓ Lunas' : '✗ Belum Bayar' }}
                                     </span>
                                     @if ($order->payment_status === 'lunas' && $order->payment_method)
-                                        <span class="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-blue-100 text-blue-700">
+                                        <span
+                                            class="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-blue-100 text-blue-700">
                                             {{ strtoupper($order->payment_method) }}
                                         </span>
                                     @endif
@@ -120,7 +133,8 @@
 
                             @php
                                 $kiloanItem = $order->items->firstWhere('service_type', 'kiloan');
-                                $isWaitingWeight = $order->has_kiloan && (!$kiloanItem || (float) ($kiloanItem->weight ?? 0) <= 0);
+                                $isWaitingWeight =
+                                    $order->has_kiloan && (!$kiloanItem || (float) ($kiloanItem->weight ?? 0) <= 0);
                             @endphp
                             <p class="font-semibold text-sm">{{ $order->member?->name ?? 'Tamu' }}</p>
                             <p class="text-xs text-on-surface-variant mt-0.5">
@@ -135,34 +149,47 @@
                                 <div class="flex items-center gap-1">
                                     {{-- Actions dropdown --}}
                                     <div class="relative" x-data="{ open: false }">
-                                        <button @click="open = !open" @click.outside="open = false" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface-variant transition-colors">
+                                        <button @click="open = !open" @click.outside="open = false"
+                                            class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface-variant transition-colors">
                                             <span class="material-symbols-outlined text-[18px]">more_vert</span>
                                         </button>
-                                        <div x-show="open" x-cloak class="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-xl border border-outline-variant z-10 overflow-hidden">
+                                        <div x-show="open" x-cloak
+                                            class="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-xl border border-outline-variant z-10 overflow-hidden">
                                             @if ($order->has_kiloan && $status === 'siap_diambil')
-                                                <button @click="open=false; $dispatch('open-weigh-modal', { orderId: {{ $order->id }} })" class="w-full px-3 py-2.5 text-xs text-left hover:bg-surface-container flex items-center gap-2 transition-colors">
-                                                    <span class="material-symbols-outlined text-[16px] text-blue-600">weight</span>
+                                                <button
+                                                    @click="open=false; $dispatch('open-weigh-modal', { orderId: {{ $order->id }} })"
+                                                    class="w-full px-3 py-2.5 text-xs text-left hover:bg-surface-container flex items-center gap-2 transition-colors">
+                                                    <span
+                                                        class="material-symbols-outlined text-[16px] text-blue-600">weight</span>
                                                     Update Berat
                                                 </button>
                                             @endif
                                             @if ($order->payment_status === 'belum_bayar' && $status === 'siap_diambil')
-                                                <button @click="open=false; $dispatch('open-payment-modal', { orderId: {{ $order->id }}, orderNumber: '{{ $order->order_number }}' })"
+                                                <button
+                                                    @click="open=false; $dispatch('open-payment-modal', { orderId: {{ $order->id }}, orderNumber: '{{ $order->order_number }}' })"
                                                     class="w-full px-3 py-2.5 text-xs text-left hover:bg-surface-container flex items-center gap-2 transition-colors">
-                                                    <span class="material-symbols-outlined text-[16px] text-green-600">payments</span>
+                                                    <span
+                                                        class="material-symbols-outlined text-[16px] text-green-600">payments</span>
                                                     Tandai Lunas
                                                 </button>
                                             @endif
-                                            <button @click="open=false; if (confirm('Hapus pesanan ini?')) { $wire.deleteOrder({{ $order->id }}) }"
+                                            <button
+                                                @click="open=false; if (confirm('Hapus pesanan ini?')) { $wire.deleteOrder({{ $order->id }}) }"
                                                 class="w-full px-3 py-2.5 text-xs text-left hover:bg-surface-container flex items-center gap-2 transition-colors text-red-600 border-t border-[#f0e0d2]">
                                                 <span class="material-symbols-outlined text-[16px]">delete</span>
                                                 Hapus Pesanan
                                             </button>
-                                            <a href="{{ route('admin.orders.show', $order) }}" @click="open=false" class="w-full px-3 py-2.5 text-xs text-left hover:bg-surface-container flex items-center gap-2 transition-colors">
-                                                <span class="material-symbols-outlined text-[16px] text-on-surface-variant">visibility</span>
+                                            <a href="{{ route('admin.orders.show', $order) }}" @click="open=false"
+                                                class="w-full px-3 py-2.5 text-xs text-left hover:bg-surface-container flex items-center gap-2 transition-colors">
+                                                <span
+                                                    class="material-symbols-outlined text-[16px] text-on-surface-variant">visibility</span>
                                                 Detail Order
                                             </a>
-                                            <a href="{{ route('admin.receipt', $order) }}" target="_blank" @click="open=false" class="w-full px-3 py-2.5 text-xs text-left hover:bg-surface-container flex items-center gap-2 transition-colors">
-                                                <span class="material-symbols-outlined text-[16px] text-on-surface-variant">print</span>
+                                            <a href="{{ route('admin.receipt', $order) }}" target="_blank"
+                                                @click="open=false"
+                                                class="w-full px-3 py-2.5 text-xs text-left hover:bg-surface-container flex items-center gap-2 transition-colors">
+                                                <span
+                                                    class="material-symbols-outlined text-[16px] text-on-surface-variant">print</span>
                                                 Cetak Struk
                                             </a>
                                             @if ($order->member)
@@ -174,9 +201,11 @@
                                                         $waPhone = '62' . $waPhone;
                                                     }
                                                 @endphp
-                                                <a href="https://wa.me/{{ $waPhone }}?text=Halo {{ urlencode($order->member->name) }}, order Anda ({{ $order->order_number }}) sudah {{ $order->status_label }}." target="_blank" @click="open=false"
+                                                <a href="https://wa.me/{{ $waPhone }}?text=Halo {{ urlencode($order->member->name) }}, order Anda ({{ $order->order_number }}) sudah {{ $order->status_label }}."
+                                                    target="_blank" @click="open=false"
                                                     class="w-full px-3 py-2.5 text-xs text-left hover:bg-surface-container flex items-center gap-2 transition-colors">
-                                                    <span class="material-symbols-outlined text-[16px] text-green-600">chat</span>
+                                                    <span
+                                                        class="material-symbols-outlined text-[16px] text-green-600">chat</span>
                                                     Kirim WA
                                                 </a>
                                             @endif
@@ -203,12 +232,15 @@
                                         @endphp
                                         @if ($nextStatus && !($nextStatus === 'selesai' && $order->payment_status !== 'lunas'))
                                             @if ($nextStatus === 'siap_diambil' && $isWaitingWeight)
-                                                <button @click="$dispatch('open-weigh-modal', { orderId: {{ $order->id }}, pendingStatus: 'siap_diambil' })"
+                                                <button
+                                                    @click="$dispatch('open-weigh-modal', { orderId: {{ $order->id }}, pendingStatus: 'siap_diambil' })"
                                                     class="px-2.5 py-1 bg-primary-container hover:bg-[#e08e0b] text-white rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">
                                                     {{ $nextLabel }} →
                                                 </button>
                                             @else
-                                                <button wire:click="updateStatus({{ $order->id }}, '{{ $nextStatus }}')" class="px-2.5 py-1 bg-primary-container hover:bg-[#e08e0b] text-white rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">
+                                                <button
+                                                    wire:click="updateStatus({{ $order->id }}, '{{ $nextStatus }}')"
+                                                    class="px-2.5 py-1 bg-primary-container hover:bg-[#e08e0b] text-white rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1">
                                                     {{ $nextLabel }} →
                                                 </button>
                                             @endif
@@ -226,7 +258,8 @@
 
                     {{-- Tombol lihat lebih / sembunyikan --}}
                     @if ($hiddenCount > 0)
-                        <button @click="showAll = !showAll" class="w-full py-2 rounded-xl text-xs font-semibold border transition-colors"
+                        <button @click="showAll = !showAll"
+                            class="w-full py-2 rounded-xl text-xs font-semibold border transition-colors"
                             :class="showAll
                                 ?
                                 'bg-white border-outline-variant text-on-surface-variant hover:bg-surface-container' :
@@ -277,7 +310,8 @@
             <div class="space-y-4">
                 <div>
                     <label for="weight" class="text-sm font-medium text-on-surface-variant">Berat (kg)</label>
-                    <input type="number" step="0.1" x-model="weight" @input="calculateTotal" class="w-full mt-1 border border-outline-variant rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:outline-none">
+                    <input type="number" step="0.1" x-model="weight" @input="calculateTotal"
+                        class="w-full mt-1 border border-outline-variant rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:outline-none">
                 </div>
                 <div>
                     <label class="text-sm font-medium text-on-surface-variant">Harga per kg</label>
@@ -285,13 +319,15 @@
                 </div>
                 <div>
                     <label class="text-sm font-medium text-on-surface-variant">Total Harga Item</label>
-                    <p class="text-lg font-bold text-primary-container" x-text="`Rp ${total.toLocaleString('id-ID')}`">
+                    <p class="text-lg font-bold text-primary-container"
+                        x-text="`Rp ${total.toLocaleString('id-ID')}`">
                     </p>
                 </div>
             </div>
 
             <div class="flex justify-end gap-3 mt-6">
-                <button @click="show = false" class="px-4 py-2 text-sm font-medium text-on-surface-variant bg-gray-100 rounded-xl hover:bg-gray-200">
+                <button @click="show = false"
+                    class="px-4 py-2 text-sm font-medium text-on-surface-variant bg-gray-100 rounded-xl hover:bg-gray-200">
                     Batal
                 </button>
                 <button
@@ -314,13 +350,14 @@
         orderId: null,
         orderNumber: '',
         paymentMethod: 'tunai'
-    }" @open-payment-modal.window="
+    }"
+        @open-payment-modal.window="
         show = true;
         orderId = $event.detail.orderId;
         orderNumber = $event.detail.orderNumber;
         paymentMethod = 'tunai';
-    " x-show="show" x-cloak
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    "
+        x-show="show" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div @click.outside="show = false" class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 m-4">
             <h3 class="text-lg font-bold mb-1">Tandai Lunas</h3>
             <p class="text-sm text-on-surface-variant mb-4" x-text="`Pilih metode bayar untuk ${orderNumber}`"></p>
@@ -338,10 +375,12 @@
             </div>
 
             <div class="flex justify-end gap-3 mt-6">
-                <button @click="show = false" class="px-4 py-2 text-sm font-medium text-on-surface-variant bg-gray-100 rounded-xl hover:bg-gray-200">
+                <button @click="show = false"
+                    class="px-4 py-2 text-sm font-medium text-on-surface-variant bg-gray-100 rounded-xl hover:bg-gray-200">
                     Batal
                 </button>
-                <button @click="$wire.markPaid(orderId, paymentMethod).then(() => { show = false })" class="px-4 py-2 text-sm font-medium text-white bg-primary-container rounded-xl hover:bg-[#e08e0b]">
+                <button @click="$wire.markPaid(orderId, paymentMethod).then(() => { show = false })"
+                    class="px-4 py-2 text-sm font-medium text-white bg-primary-container rounded-xl hover:bg-[#e08e0b]">
                     Simpan
                 </button>
             </div>

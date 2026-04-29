@@ -28,7 +28,7 @@
             </select>
             <select wire:model.live="filterMember"
                 class="h-10 border border-outline-variant rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:outline-none bg-white w-full lg:w-40">
-                <option value="">Semua Pelanggan</option>
+                <option value="">Semua Pelanggan Laundry</option>
                 <option value="guest">Tamu</option>
                 @foreach ($this->membersForFilter as $member)
                     <option value="{{ $member->id }}">{{ $member->name }}</option>

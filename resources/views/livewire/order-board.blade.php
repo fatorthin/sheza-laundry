@@ -21,7 +21,7 @@
             </select>
             <select wire:model.live="filterStatus"
                 class="h-10 border border-outline-variant rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:outline-none bg-white w-full lg:w-36">
-                <option value="">Semua Status</option>
+                <option value="">Semua Status Order</option>
                 @foreach ($statuses as $statusVal => $statusLabel)
                     <option value="{{ $statusVal }}">{{ $statusLabel }}</option>
                 @endforeach

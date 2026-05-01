@@ -178,6 +178,7 @@ class Pos extends Component
 
         $this->lastOrderId = $order->id;
         $this->showSuccessModal = true;
+        $this->dispatch('order-processed');
         $this->clearCart();
     }
 

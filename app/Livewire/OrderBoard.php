@@ -124,7 +124,11 @@ class OrderBoard extends Component
         $order->delete();
     }
 
-    public function updateWeight(int $orderId, float $weight): void
+    /**
+     * Update weights for one or multiple kiloan items at once.
+     * $weights: [ itemId => weight, ... ]
+     */
+    public function updateItemWeights(int $orderId, array $weights): void
     {
         $order = Order::with('items')->find($orderId);
 
@@ -132,19 +136,21 @@ class OrderBoard extends Component
             return;
         }
 
-        $validatedWeight = max(0, (float) $weight);
-
-        $kiloanItem = $order->items->firstWhere('service_type', 'kiloan');
-
-        if ($kiloanItem) {
-            $kiloanItem->quantity = $validatedWeight;
-            $kiloanItem->weight = $validatedWeight;
-            $kiloanItem->subtotal = $kiloanItem->price * $validatedWeight;
-            $kiloanItem->save();
-
-            $order->update(['weight' => $validatedWeight]);
-            $order->recalculate();
+        foreach ($weights as $itemId => $weight) {
+            $item = $order->items->firstWhere('id', (int) $itemId);
+            if (!$item || $item->service_type !== 'kiloan') {
+                continue;
+            }
+            $w = max(0, (float) $weight);
+            $item->weight   = $w;
+            $item->quantity = $w;
+            $item->subtotal = $item->price * $w;
+            $item->save();
         }
+
+        // Refresh items so recalculate sums the updated subtotals
+        $order->load('items');
+        $order->recalculate();
     }
 
     public function render()

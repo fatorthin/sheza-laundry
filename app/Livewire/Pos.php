@@ -16,7 +16,10 @@ class Pos extends Component
     public string $searchService = '';
     public string $searchMember = '';
     public ?int $selectedMemberId = null;
-    public bool $showMemberSearch = false;
+    public string $memberPanel = ''; // '' | 'search' | 'new'
+    public string $newMemberName = '';
+    public string $newMemberPhone = '';
+    public string $newMemberAddress = '';
     public bool $showSuccessModal = false;
     public ?int $lastOrderId = null;
 
@@ -122,22 +125,64 @@ class Pos extends Component
         unset($this->cart[$key]);
     }
 
+    public function openMemberPanel(string $mode): void
+    {
+        $this->memberPanel = $mode;
+        $this->searchMember = '';
+        $this->newMemberName = '';
+        $this->newMemberPhone = '';
+        $this->newMemberAddress = '';
+        $this->resetErrorBag();
+    }
+
+    public function closeMemberPanel(): void
+    {
+        $this->memberPanel = '';
+        $this->resetErrorBag();
+    }
+
+    public function createMember(): void
+    {
+        $this->validate([
+            'newMemberName'  => 'required|min:2|max:100',
+            'newMemberPhone' => 'required|min:6|max:20|unique:members,phone',
+        ], [
+            'newMemberName.required'  => 'Nama wajib diisi.',
+            'newMemberName.min'       => 'Nama minimal 2 karakter.',
+            'newMemberPhone.required' => 'No. HP wajib diisi.',
+            'newMemberPhone.min'      => 'No. HP minimal 6 digit.',
+            'newMemberPhone.unique'   => 'No. HP sudah terdaftar.',
+        ]);
+
+        $member = Member::create([
+            'name'    => trim($this->newMemberName),
+            'phone'   => trim($this->newMemberPhone),
+            'address' => trim($this->newMemberAddress) ?: null,
+        ]);
+
+        $this->selectMember($member->id);
+    }
+
     public function selectMember(int $memberId): void
     {
         $this->selectedMemberId = $memberId;
-        $this->showMemberSearch = false;
+        $this->memberPanel = '';
         $this->searchMember = '';
+        $this->resetErrorBag();
     }
 
     public function clearMember(): void
     {
         $this->selectedMemberId = null;
+        $this->memberPanel = '';
     }
 
     public function clearCart(): void
     {
         $this->cart = [];
         $this->selectedMemberId = null;
+        $this->memberPanel = '';
+        $this->resetErrorBag();
     }
 
     public function processOrder(): void

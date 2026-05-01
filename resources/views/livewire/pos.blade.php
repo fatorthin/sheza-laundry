@@ -131,7 +131,7 @@
 
     {{-- ===== Success Modal ===== --}}
     @if ($showSuccessModal)
-        <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+        <div class="fixed inset-0 z-60 flex items-center justify-center bg-black/50 p-4">
             <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
                 <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
                     <span class="material-symbols-outlined text-green-600 text-3xl filled">check_circle</span>

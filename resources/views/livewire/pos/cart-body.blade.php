@@ -4,49 +4,119 @@
 --}}
 
 {{-- Customer selector --}}
-<div class="p-4 border-b border-outline-variant shrink-0">
-    <div class="relative">
-        @if ($selectedMemberId && $this->selectedMember)
-            <div class="flex items-center gap-2 px-3 py-2 bg-surface-container border border-outline-variant rounded-xl">
-                <div class="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-white text-xs font-bold shrink-0">
-                    {{ strtoupper(substr($this->selectedMember->name, 0, 2)) }}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold truncate">{{ $this->selectedMember->name }}</p>
-                    <p class="text-[10px] text-on-surface-variant">{{ $this->selectedMember->phone }}</p>
-                </div>
-                <button wire:click="clearMember" class="text-on-surface-variant hover:text-red-500">
-                    <span class="material-symbols-outlined text-[16px]">close</span>
+<div class="p-4 border-b border-outline-variant shrink-0 space-y-2">
+
+    {{-- [STATE: member selected] --}}
+    @if ($selectedMemberId && $this->selectedMember)
+        <div class="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-xl">
+            <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-white text-xs font-bold shrink-0">
+                {{ strtoupper(substr($this->selectedMember->name, 0, 2)) }}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold truncate">{{ $this->selectedMember->name }}</p>
+                <p class="text-[10px] text-on-surface-variant">{{ $this->selectedMember->phone }}</p>
+            </div>
+            <button wire:click="clearMember" class="text-on-surface-variant hover:text-red-500 shrink-0">
+                <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+        </div>
+
+        {{-- [STATE: no panel open] → show two-option trigger --}}
+    @elseif ($memberPanel === '')
+        <div class="grid grid-cols-2 gap-2">
+            <button wire:click="openMemberPanel('search')" class="flex items-center justify-center gap-1.5 px-3 py-2.5 border border-dashed border-outline-variant rounded-xl text-xs text-on-surface-variant hover:border-primary-container hover:text-[#865300] transition-colors">
+                <span class="material-symbols-outlined text-[16px]">manage_search</span>
+                Cari Pelanggan
+            </button>
+            <button wire:click="openMemberPanel('new')" class="flex items-center justify-center gap-1.5 px-3 py-2.5 border border-dashed border-primary-container rounded-xl text-xs text-primary-container hover:bg-primary-container/10 transition-colors font-medium">
+                <span class="material-symbols-outlined text-[16px]">person_add</span>
+                Pelanggan Baru
+            </button>
+        </div>
+
+        {{-- [STATE: search panel] --}}
+    @elseif ($memberPanel === 'search')
+        <div class="space-y-1">
+            <div class="flex items-center gap-2 mb-1.5">
+                <span class="text-xs font-semibold text-on-surface flex-1">Cari Pelanggan</span>
+                <button wire:click="closeMemberPanel" class="text-[10px] text-on-surface-variant hover:text-red-500 flex items-center gap-0.5">
+                    <span class="material-symbols-outlined text-[14px]">close</span> Tutup
                 </button>
             </div>
-        @else
-            <button wire:click="$set('showMemberSearch', true)" class="w-full flex items-center gap-2 px-3 py-2.5 border border-dashed border-outline-variant rounded-xl text-sm text-on-surface-variant hover:border-primary-container hover:text-[#865300] transition-colors">
-                <span class="material-symbols-outlined text-[18px]">person_add</span>
-                Pilih Pelanggan
-                <span class="ml-auto material-symbols-outlined text-[16px]">chevron_right</span>
-            </button>
-        @endif
-
-        @if ($showMemberSearch)
-            <div class="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-outline-variant rounded-xl shadow-xl">
-                <div class="p-2">
-                    <input wire:model.live.debounce.300ms="searchMember" type="text" placeholder="Cari nama / HP..." class="w-full px-3 py-2 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:outline-none" autofocus>
+            <input wire:model.live.debounce.300ms="searchMember" type="text" placeholder="Nama atau No. HP..." class="w-full px-3 py-2 text-sm border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary-container focus:outline-none bg-[#fff8f4]" autofocus>
+            @if (strlen($searchMember) >= 2)
+                <div class="border border-outline-variant rounded-xl overflow-hidden mt-1">
+                    @forelse ($this->members as $m)
+                        <button wire:click="selectMember({{ $m->id }})" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-surface-container text-left transition-colors border-b border-outline-variant last:border-0">
+                            <div class="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+                                {{ strtoupper(substr($m->name, 0, 2)) }}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-medium truncate">{{ $m->name }}</p>
+                                <p class="text-[10px] text-on-surface-variant">{{ $m->phone }}</p>
+                            </div>
+                        </button>
+                    @empty
+                        <div class="px-3 py-3 text-xs text-on-surface-variant text-center">
+                            Pelanggan tidak ditemukan.
+                            <button wire:click="openMemberPanel('new')" class="text-primary-container font-semibold ml-1 hover:underline">Daftarkan?</button>
+                        </div>
+                    @endforelse
                 </div>
-                @foreach ($this->members as $m)
-                    <button wire:click="selectMember({{ $m->id }})" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-surface-container text-left transition-colors">
-                        <div class="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-white text-xs font-bold">
-                            {{ strtoupper(substr($m->name, 0, 2)) }}
-                        </div>
-                        <div>
-                            <p class="text-xs font-medium">{{ $m->name }}</p>
-                            <p class="text-[10px] text-on-surface-variant">{{ $m->phone }}</p>
-                        </div>
-                    </button>
-                @endforeach
-                <button wire:click="$set('showMemberSearch', false)" class="w-full px-3 py-2 text-xs text-on-surface-variant hover:bg-gray-50 border-t border-outline-variant">Tutup</button>
+            @endif
+        </div>
+
+        {{-- [STATE: new member form] --}}
+    @elseif ($memberPanel === 'new')
+        <div>
+            <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined text-primary-container text-[18px]">person_add</span>
+                <span class="text-xs font-semibold text-on-surface flex-1">Daftarkan Pelanggan Baru</span>
+                <button wire:click="closeMemberPanel" class="text-[10px] text-on-surface-variant hover:text-red-500 flex items-center gap-0.5">
+                    <span class="material-symbols-outlined text-[14px]">close</span> Batal
+                </button>
             </div>
-        @endif
-    </div>
+
+            <div class="space-y-2">
+                {{-- Name --}}
+                <div>
+                    <input wire:model="newMemberName" type="text" placeholder="Nama lengkap *"
+                        class="w-full px-3 py-2.5 text-sm border rounded-xl focus:ring-2 focus:ring-primary-container focus:outline-none bg-[#fff8f4]
+                               {{ $errors->has('newMemberName') ? 'border-red-400 bg-red-50' : 'border-outline-variant' }}">
+                    @error('newMemberName')
+                        <p class="text-[10px] text-red-500 mt-1 ml-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Phone --}}
+                <div>
+                    <input wire:model="newMemberPhone" type="tel" placeholder="No. HP / WhatsApp *"
+                        class="w-full px-3 py-2.5 text-sm border rounded-xl focus:ring-2 focus:ring-primary-container focus:outline-none bg-[#fff8f4]
+                               {{ $errors->has('newMemberPhone') ? 'border-red-400 bg-red-50' : 'border-outline-variant' }}">
+                    @error('newMemberPhone')
+                        <p class="text-[10px] text-red-500 mt-1 ml-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Address (optional) --}}
+                <input wire:model="newMemberAddress" type="text" placeholder="Alamat (opsional)" class="w-full px-3 py-2.5 text-sm border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary-container focus:outline-none bg-[#fff8f4]">
+
+                {{-- Submit --}}
+                <button wire:click="createMember" wire:loading.attr="disabled" class="w-full py-2.5 bg-primary-container text-white rounded-xl text-sm font-semibold hover:bg-[#e08e0b] transition-colors flex items-center justify-center gap-2 active:scale-[0.98]">
+                    <span wire:loading.remove class="material-symbols-outlined text-[16px]">how_to_reg</span>
+                    <span wire:loading>
+                        <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="white" stroke-width="3" opacity="0.3" />
+                            <path d="M12 2a10 10 0 0110 10" stroke="white" stroke-width="3" stroke-linecap="round" />
+                        </svg>
+                    </span>
+                    <span wire:loading.remove>Simpan & Pilih</span>
+                    <span wire:loading>Menyimpan...</span>
+                </button>
+            </div>
+        </div>
+    @endif
+
 </div>
 
 {{-- Cart items --}}

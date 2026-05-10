@@ -180,6 +180,13 @@
                 box-shadow: none;
                 max-width: 100%;
             }
+
+            img {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                display: block !important;
+                visibility: visible !important;
+            }
         }
     </style>
 </head>
@@ -264,11 +271,21 @@
         <div class="border-dash"></div>
 
         <!-- Footer -->
-        <div class="footer-text">
-            <strong>TERIMA KASIH!</strong><br>
-            Simpan struk ini sebagai bukti pengambilan.
+        <div class="border-dash"></div>
+        <div class="meta-row">
+            <span class="meta-label">Tgl Selesai:</span>
+            <span>{{ $order->ready_at ? $order->ready_at->translatedFormat('j F Y') : $order->created_at->addDays($order->is_express ? 1 : 3)->translatedFormat('j F Y') }}</span>
         </div>
-        <div class="footer-brand">ShezaLaundry System · shezalaundry.com</div>
+        <div class="border-dash"></div>
+        <div class="footer-text">
+            <strong>TERIMAKASIH</strong><br>
+            Tidak Menerima Laundry Pakaian Dalam<br>
+            Menerima Laundry alat Gunung<br><br>
+            IG : ShezaLaundrySolo<br>
+            IG : Krabat adventure store
+        </div>
+        <div class="border-dash"></div>
+        <div class="footer-brand" id="print-timestamp"></div>
     </div>
 </body>
 
@@ -276,6 +293,7 @@
     $receiptData = [
         'order_number' => $order->order_number,
         'created_at' => $order->created_at->format('d/m/Y H:i'),
+        'finish_at' => $order->ready_at ? $order->ready_at->format('d/m/Y') : $order->created_at->addDays($order->is_express ? 1 : 3)->format('d/m/Y'),
         'cashier' => $order->user?->name ?? 'Admin',
         'customer' => strtoupper($order->member?->name ?? 'TAMU'),
         'items' => $order->items
@@ -298,6 +316,17 @@
 <script>
     // ── Data dari server ─────────────────────────────────────────────────
     const RECEIPT = @json($receiptData);
+
+    // Tampilkan waktu cetak
+    (function() {
+        var now = new Date();
+        var dd = String(now.getDate()).padStart(2, '0');
+        var mm = String(now.getMonth() + 1).padStart(2, '0');
+        var yyyy = now.getFullYear();
+        var hh = String(now.getHours()).padStart(2, '0');
+        var min = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('print-timestamp').textContent = 'Dicetak: ' + dd + '/' + mm + '/' + yyyy + ' ' + hh + ':' + min;
+    })();
 
     // ── ESC/POS builder (kertas 58mm = 32 karakter per baris) ────────────
     const W = 32;
@@ -422,9 +451,17 @@
             t += c2('DIBAYAR (' + d.payment_method.toUpperCase() + '):', 'Rp ' + d.paid_amount) + '\n';
         }
         t += SEP + '\n';
-        t += center('TERIMA KASIH!') + '\n';
-        t += center('Simpan struk sebagai') + '\n';
-        t += center('bukti pengambilan.') + '\n';
+        t += c2('Tgl Selesai:', d.finish_at) + '\n';
+        t += SEP + '\n';
+        t += center('TERIMAKASIH') + '\n';
+        t += center('Tdk Trima Laundry Pakaian Dlm') + '\n';
+        t += center('Menerima Laundry alat Gunung') + '\n';
+        t += center('IG : ShezaLaundrySolo') + '\n';
+        t += center('IG : Krabat adventure store') + '\n';
+        t += SEP + '\n';
+        var now = new Date();
+        var tsCetak = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear() + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        t += center('Dicetak: ' + tsCetak) + '\n';
         t += '\n\n\n';
         return t;
     }
@@ -448,17 +485,7 @@
             btn.innerHTML = origHTML;
 
             if (!document.hidden && Date.now() - openedAt < 3500) {
-                var goInstall = confirm(
-                    'Aplikasi RawBT tidak terdeteksi di perangkat ini.\n\n' +
-                    'RawBT diperlukan agar bisa cetak langsung ke printer thermal Bluetooth.\n\n' +
-                    'Buka Play Store untuk install RawBT?\n' +
-                    '(Tekan Batal untuk cetak via dialog browser biasa)'
-                );
-                if (goInstall) {
-                    window.open('https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter', '_blank');
-                } else {
-                    window.print();
-                }
+                window.print();
             }
         }, 2000);
     }

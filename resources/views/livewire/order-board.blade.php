@@ -42,8 +42,7 @@
         @php
             $statusConfig = [
                 'baru' => ['label' => 'Baru', 'color' => 'blue', 'icon' => 'fiber_new'],
-                'dicuci' => ['label' => 'Dicuci', 'color' => 'yellow', 'icon' => 'local_laundry_service'],
-                'disetrika' => ['label' => 'Disetrika', 'color' => 'orange', 'icon' => 'iron'],
+                'dikerjakan' => ['label' => 'Dikerjakan', 'color' => 'yellow', 'icon' => 'local_laundry_service'],
                 'siap_diambil' => ['label' => 'Siap Diambil', 'color' => 'green', 'icon' => 'done_all'],
                 'selesai' => ['label' => 'Selesai', 'color' => 'gray', 'icon' => 'check_circle'],
             ];
@@ -188,15 +187,13 @@
                                         @php
                                             $nextStatus = match ($status) {
                                                 'baru' => 'dicuci',
-                                                'dicuci' => 'disetrika',
-                                                'disetrika' => 'siap_diambil',
+                                                'dikerjakan' => 'siap_diambil',
                                                 'siap_diambil' => 'selesai',
                                                 default => null,
                                             };
                                             $nextLabel = match ($status) {
-                                                'baru' => 'Mulai Cuci',
-                                                'dicuci' => 'Setrika',
-                                                'disetrika' => 'Siap Ambil',
+                                                'baru' => 'Kerjakan',
+                                                'dikerjakan' => 'Siap Ambil',
                                                 'siap_diambil' => 'Selesai',
                                                 default => null,
                                             };

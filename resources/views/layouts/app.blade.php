@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#f39c12">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Sheza Laundry">
-    <title>@yield('title', 'Sheza Laundry')</title>
+    <title>@yield('title', 'Sheza Laundry Solo')</title>
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/png" href="/logo-sheza.png">
     <link rel="apple-touch-icon" href="/logo-sheza.png">

@@ -23,7 +23,8 @@ class Order extends Model
         'has_kiloan',
         'is_express',
         'notes',
-        'picked_up_at'
+        'picked_up_at',
+        'ready_at',
     ];
 
     protected $casts = [
@@ -35,6 +36,7 @@ class Order extends Model
         'has_kiloan'  => 'boolean',
         'is_express'  => 'boolean',
         'picked_up_at' => 'datetime',
+        'ready_at'    => 'datetime',
     ];
 
     public static function generateOrderNumber(): string

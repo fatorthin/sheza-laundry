@@ -21,11 +21,20 @@ class OrderBoard extends Component
     ];
 
     public array $statuses = [
-        'baru' => 'Baru',
-        'dicuci' => 'Dicuci',
-        'disetrika' => 'Disetrika',
+        'baru'         => 'Baru',
+        'dikerjakan'   => 'Dikerjakan',
         'siap_diambil' => 'Siap Diambil',
-        'selesai' => 'Selesai',
+        'selesai'      => 'Selesai',
+    ];
+
+    // Label map for all internal DB status values (incl. legacy dicuci/disetrika)
+    private array $statusLabels = [
+        'baru'         => 'Baru',
+        'dicuci'       => 'Dikerjakan',
+        'disetrika'    => 'Dikerjakan',
+        'dikerjakan'   => 'Dikerjakan',
+        'siap_diambil' => 'Siap Diambil',
+        'selesai'      => 'Selesai',
     ];
 
     #[Computed]
@@ -48,7 +57,9 @@ class OrderBoard extends Component
             })
             ->latest()
             ->get()
-            ->groupBy('status');
+            ->groupBy(function ($order) {
+                return in_array($order->status, ['dicuci', 'disetrika']) ? 'dikerjakan' : $order->status;
+            });
     }
 
     #[Computed]
@@ -67,11 +78,14 @@ class OrderBoard extends Component
             return;
         }
 
-        $order->update(['status' => $newStatus]);
-
-        if ($newStatus === 'selesai') {
-            $order->update(['picked_up_at' => now()]);
+        $update = ['status' => $newStatus];
+        if ($newStatus === 'siap_diambil' && !$order->ready_at) {
+            $update['ready_at'] = now();
         }
+        if ($newStatus === 'selesai') {
+            $update['picked_up_at'] = now();
+        }
+        $order->update($update);
 
         // WhatsApp notification (dispatched to queue — non-blocking)
         $phone = $order->member?->phone;
@@ -79,7 +93,7 @@ class OrderBoard extends Component
             if ($newStatus === 'siap_diambil') {
                 SendWhatsAppNotification::dispatch('ready_pickup', $phone, $order);
             } else {
-                $statusLabel = $this->statuses[$newStatus] ?? $newStatus;
+                $statusLabel = $this->statusLabels[$newStatus] ?? $newStatus;
                 SendWhatsAppNotification::dispatch('status', $phone, null, [
                     'order_number' => $order->order_number,
                     'status_label' => $statusLabel,

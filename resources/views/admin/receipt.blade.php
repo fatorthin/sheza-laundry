@@ -187,17 +187,17 @@
 <body>
     <div class="toolbar no-print">
         <button class="btn btn-back" onclick="window.history.back()">← Kembali</button>
-        <button class="btn btn-print" onclick="window.print()">🖨️ Cetak</button>
+        <button id="btn-thermal" class="btn btn-print" onclick="triggerReceiptPrint()">🖨️ Cetak</button>
     </div>
 
     <div class="receipt">
         <!-- Header -->
         <div class="text-center">
-            <div class="header-logo">🧺</div>
-            <div class="header-title">SHEZA LAUNDRY</div>
+            <div class="header-logo"><img src="/logo-sheza.png" alt="Sheza Laundry" style="max-width: 100px; height: auto;"></div>
+            <div class="header-title">SHEZA LAUNDRY SOLO</div>
             <div class="header-sub">
-                Jl. Contoh No. 123, Jakarta<br>
-                Tel: +62 812-3456-7890
+                Jl. Pucangsawit RT 03 RW 03, Kecamatan Jebres, Kota Surakarta<br>
+                Tel: +62 8820-0933-4660
             </div>
         </div>
 
@@ -205,12 +205,10 @@
 
         <!-- Meta -->
         <div class="meta-row"><span class="meta-label">Order ID:</span><strong>{{ $order->order_number }}</strong></div>
-        <div class="meta-row"><span
-                class="meta-label">Tanggal:</span><span>{{ $order->created_at->format('Y-m-d H:i') }}</span></div>
+        <div class="meta-row"><span class="meta-label">Tanggal:</span><span>{{ $order->created_at->format('Y-m-d H:i') }}</span></div>
         <div class="meta-row"><span class="meta-label">Kasir:</span><span>{{ $order->user?->name ?? 'Admin' }}</span>
         </div>
-        <div class="meta-row"><span
-                class="meta-label">Pelanggan:</span><span>{{ strtoupper($order->member?->name ?? 'TAMU') }}</span></div>
+        <div class="meta-row"><span class="meta-label">Pelanggan:</span><span>{{ strtoupper($order->member?->name ?? 'TAMU') }}</span></div>
 
         <div class="border-dash"></div>
 
@@ -273,5 +271,149 @@
         <div class="footer-brand">ShezaLaundry System · shezalaundry.com</div>
     </div>
 </body>
+
+@php
+    $receiptData = [
+        'order_number' => $order->order_number,
+        'created_at' => $order->created_at->format('d/m/Y H:i'),
+        'cashier' => $order->user?->name ?? 'Admin',
+        'customer' => strtoupper($order->member?->name ?? 'TAMU'),
+        'items' => $order->items
+            ->map(function ($item) {
+                return [
+                    'name' => $item->service_name,
+                    'qty' => $item->service_type === 'kiloan' ? ($item->weight ? $item->weight . 'kg' : '?kg') : intval($item->quantity) . 'x',
+                    'subtotal' => $item->service_type === 'kiloan' && !$item->weight ? 'TBD' : number_format($item->subtotal, 0, ',', '.'),
+                ];
+            })
+            ->values()
+            ->toArray(),
+        'subtotal' => number_format($order->subtotal, 0, ',', '.'),
+        'total' => number_format($order->total, 0, ',', '.'),
+        'payment_status' => $order->payment_status,
+        'payment_method' => $order->payment_method ?? 'tunai',
+        'paid_amount' => number_format($order->paid_amount ?? $order->total, 0, ',', '.'),
+    ];
+@endphp
+<script>
+    // ── Data dari server ─────────────────────────────────────────────────
+    const RECEIPT = @json($receiptData);
+
+    // ── ESC/POS builder (kertas 58mm = 32 karakter per baris) ────────────
+    const W = 32;
+    const ESC = '\x1B',
+        GS = '\x1D',
+        LF = '\n';
+
+    function rpad(s, n) {
+        s = String(s);
+        return s.length >= n ? s.slice(0, n) : s + ' '.repeat(n - s.length);
+    }
+
+    function lpad(s, n) {
+        s = String(s);
+        return s.length >= n ? s.slice(0, n) : ' '.repeat(n - s.length) + s;
+    }
+
+    function cols2(a, b, total) {
+        total = total || W;
+        a = String(a);
+        b = String(b);
+        if (a.length + b.length + 1 > total) a = a.slice(0, total - b.length - 1);
+        return a + ' '.repeat(total - a.length - b.length) + b;
+    }
+
+    function buildEscPos(d) {
+        const SEP = '-'.repeat(W);
+        let t = '';
+        t += ESC + '@';
+        t += ESC + 'a\x01';
+        t += ESC + 'E\x01';
+        t += 'SHEZA LAUNDRY SOLO' + LF;
+        t += ESC + 'E\x00';
+        t += 'Jl. Pucangsawit RT 03 RW 03' + LF;
+        t += 'Kec. Jebres, Surakarta' + LF;
+        t += 'Tel: +62 8820-0933-4660' + LF;
+        t += ESC + 'a\x00';
+        t += SEP + LF;
+        t += cols2('Order ID :', d.order_number) + LF;
+        t += cols2('Tanggal  :', d.created_at) + LF;
+        t += cols2('Kasir    :', d.cashier) + LF;
+        t += cols2('Pelanggan:', d.customer) + LF;
+        t += SEP + LF;
+        t += ESC + 'E\x01';
+        t += rpad('ITEM', 17) + rpad('QTY', 7) + lpad('TOTAL', 8) + LF;
+        t += ESC + 'E\x00';
+        for (var i = 0; i < d.items.length; i++) {
+            var item = d.items[i];
+            t += rpad(item.name, 17) + rpad(item.qty, 7) + lpad(item.subtotal, 8) + LF;
+        }
+        t += SEP + LF;
+        t += cols2('Subtotal :', 'Rp ' + d.subtotal) + LF;
+        t += SEP + LF;
+        t += ESC + 'E\x01';
+        t += cols2('TOTAL    :', 'Rp ' + d.total) + LF;
+        t += ESC + 'E\x00';
+        if (d.payment_status === 'lunas') {
+            t += SEP + LF;
+            t += cols2('DIBAYAR (' + d.payment_method.toUpperCase() + '):', 'Rp ' + d.paid_amount) + LF;
+        }
+        t += SEP + LF;
+        t += ESC + 'a\x01';
+        t += ESC + 'E\x01';
+        t += 'TERIMA KASIH!' + LF;
+        t += ESC + 'E\x00';
+        t += 'Simpan struk ini sebagai' + LF;
+        t += 'bukti pengambilan.' + LF;
+        t += LF + LF + LF;
+        t += GS + 'V\x41\x03';
+        return t;
+    }
+
+    function strToBase64(str) {
+        // Encode raw binary string ke base64
+        var bytes = new Uint8Array(str.length);
+        for (var i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i) & 0xFF;
+        var binary = '';
+        for (var j = 0; j < bytes.length; j++) binary += String.fromCharCode(bytes[j]);
+        return btoa(binary);
+    }
+
+    function triggerReceiptPrint() {
+        var btn = document.getElementById('btn-thermal');
+        var origHTML = btn.innerHTML;
+
+        var escposRaw = buildEscPos(RECEIPT);
+        var b64 = strToBase64(escposRaw);
+
+        // Coba buka RawBT via deep link (rawbt: URI scheme)
+        btn.disabled = true;
+        btn.textContent = 'Membuka RawBT...';
+
+        var openedAt = Date.now();
+        window.location.href = 'rawbt:' + b64;
+
+        // Jika setelah 2 detik halaman masih aktif, RawBT kemungkinan tidak terinstall
+        setTimeout(function() {
+            btn.disabled = false;
+            btn.innerHTML = origHTML;
+
+            // Hanya tampilkan fallback jika tab masih fokus (user tidak pindah ke RawBT)
+            if (!document.hidden && Date.now() - openedAt < 3500) {
+                var goInstall = confirm(
+                    'Aplikasi RawBT tidak terdeteksi di perangkat ini.\n\n' +
+                    'RawBT diperlukan agar bisa cetak langsung ke printer thermal Bluetooth.\n\n' +
+                    'Buka Play Store untuk install RawBT?\n' +
+                    '(Tekan Batal untuk cetak via dialog browser biasa)'
+                );
+                if (goInstall) {
+                    window.open('https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter', '_blank');
+                } else {
+                    window.print();
+                }
+            }
+        }, 2000);
+    }
+</script>
 
 </html>

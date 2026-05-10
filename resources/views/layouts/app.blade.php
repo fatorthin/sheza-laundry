@@ -10,9 +10,10 @@
     <meta name="apple-mobile-web-app-title" content="Sheza Laundry">
     <title>@yield('title', 'Sheza Laundry')</title>
     <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="/logo-sheza.png">
+    <link rel="apple-touch-icon" href="/logo-sheza.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
@@ -21,26 +22,20 @@
     <main class="flex-1 pb-20">@yield('content')</main>
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-outline-variant pb-safe z-50">
         <div class="flex">
-            <a href="{{ route('landing') }}"
-                class="flex-1 flex flex-col items-center py-2 text-xs {{ request()->routeIs('landing') ? 'text-primary-container' : 'text-on-surface-variant' }}">
-                <span
-                    class="material-symbols-outlined text-[22px] mb-0.5 {{ request()->routeIs('landing') ? 'filled' : '' }}">home</span>
+            <a href="{{ route('landing') }}" class="flex-1 flex flex-col items-center py-2 text-xs {{ request()->routeIs('landing') ? 'text-primary-container' : 'text-on-surface-variant' }}">
+                <span class="material-symbols-outlined text-[22px] mb-0.5 {{ request()->routeIs('landing') ? 'filled' : '' }}">home</span>
                 Beranda
             </a>
-            <a href="{{ route('landing') }}#layanan"
-                class="flex-1 flex flex-col items-center py-2 text-xs text-on-surface-variant">
+            <a href="{{ route('landing') }}#layanan" class="flex-1 flex flex-col items-center py-2 text-xs text-on-surface-variant">
                 <span class="material-symbols-outlined text-[22px] mb-0.5">dry_cleaning</span>
                 Layanan
             </a>
-            <a href="{{ route('landing') }}#lacak"
-                class="flex-1 flex flex-col items-center py-2 text-xs text-on-surface-variant">
+            <a href="{{ route('landing') }}#lacak" class="flex-1 flex flex-col items-center py-2 text-xs text-on-surface-variant">
                 <span class="material-symbols-outlined text-[22px] mb-0.5">receipt_long</span>
                 Lacak
             </a>
-            <a href="{{ route('profil') }}"
-                class="flex-1 flex flex-col items-center py-2 text-xs {{ request()->routeIs('profil') ? 'text-primary-container' : 'text-on-surface-variant' }}">
-                <span
-                    class="material-symbols-outlined text-[22px] mb-0.5 {{ request()->routeIs('profil') ? 'filled' : '' }}">person</span>
+            <a href="{{ route('profil') }}" class="flex-1 flex flex-col items-center py-2 text-xs {{ request()->routeIs('profil') ? 'text-primary-container' : 'text-on-surface-variant' }}">
+                <span class="material-symbols-outlined text-[22px] mb-0.5 {{ request()->routeIs('profil') ? 'filled' : '' }}">person</span>
                 Profil
             </a>
         </div>

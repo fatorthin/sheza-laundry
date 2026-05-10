@@ -186,7 +186,7 @@
 
 <body>
     <div class="toolbar no-print">
-        <button class="btn btn-back" onclick="window.history.back()">← Kembali</button>
+        <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-back">← Kembali</a>
         <button id="btn-thermal" class="btn btn-print" onclick="triggerReceiptPrint()">🖨️ Cetak</button>
     </div>
 
@@ -370,35 +370,83 @@
         return t;
     }
 
-    function strToBase64(str) {
-        // Encode raw binary string ke base64
-        var bytes = new Uint8Array(str.length);
-        for (var i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i) & 0xFF;
-        var binary = '';
-        for (var j = 0; j < bytes.length; j++) binary += String.fromCharCode(bytes[j]);
-        return btoa(binary);
+    function buildPlainText(d) {
+        var SEP = '--------------------------------';
+        var W = 32;
+
+        function rp(s, n) {
+            s = String(s);
+            return s.length >= n ? s.slice(0, n) : s + ' '.repeat(n - s.length);
+        }
+
+        function lp(s, n) {
+            s = String(s);
+            return s.length >= n ? s.slice(0, n) : ' '.repeat(n - s.length) + s;
+        }
+
+        function c2(a, b) {
+            a = String(a);
+            b = String(b);
+            if (a.length + b.length + 1 > W) a = a.slice(0, W - b.length - 1);
+            return a + ' '.repeat(W - a.length - b.length) + b;
+        }
+
+        function center(s) {
+            s = String(s);
+            var pad = Math.max(0, Math.floor((W - s.length) / 2));
+            return ' '.repeat(pad) + s;
+        }
+        var t = '';
+        t += center('SHEZA LAUNDRY SOLO') + '\n';
+        t += center('Jl. Pucangsawit RT 03 RW 03') + '\n';
+        t += center('Kec. Jebres, Surakarta') + '\n';
+        t += center('Tel: +62 8820-0933-4660') + '\n';
+        t += SEP + '\n';
+        t += c2('Order ID :', d.order_number) + '\n';
+        t += c2('Tanggal  :', d.created_at) + '\n';
+        t += c2('Kasir    :', d.cashier) + '\n';
+        t += c2('Pelanggan:', d.customer) + '\n';
+        t += SEP + '\n';
+        t += rp('ITEM', 17) + rp('QTY', 7) + lp('TOTAL', 8) + '\n';
+        t += SEP + '\n';
+        for (var i = 0; i < d.items.length; i++) {
+            var item = d.items[i];
+            t += rp(item.name, 17) + rp(item.qty, 7) + lp(item.subtotal, 8) + '\n';
+        }
+        t += SEP + '\n';
+        t += c2('Subtotal :', 'Rp ' + d.subtotal) + '\n';
+        t += SEP + '\n';
+        t += c2('TOTAL    :', 'Rp ' + d.total) + '\n';
+        if (d.payment_status === 'lunas') {
+            t += SEP + '\n';
+            t += c2('DIBAYAR (' + d.payment_method.toUpperCase() + '):', 'Rp ' + d.paid_amount) + '\n';
+        }
+        t += SEP + '\n';
+        t += center('TERIMA KASIH!') + '\n';
+        t += center('Simpan struk sebagai') + '\n';
+        t += center('bukti pengambilan.') + '\n';
+        t += '\n\n\n';
+        return t;
     }
 
     function triggerReceiptPrint() {
         var btn = document.getElementById('btn-thermal');
         var origHTML = btn.innerHTML;
 
-        var escposRaw = buildEscPos(RECEIPT);
-        var b64 = strToBase64(escposRaw);
+        // Kirim plain text ke RawBT — format yang benar dan langsung dicetak printer
+        var plainText = buildPlainText(RECEIPT);
 
-        // Coba buka RawBT via deep link (rawbt: URI scheme)
         btn.disabled = true;
         btn.textContent = 'Membuka RawBT...';
 
         var openedAt = Date.now();
-        window.location.href = 'rawbt:' + b64;
+        window.location.href = 'rawbt:' + encodeURIComponent(plainText);
 
         // Jika setelah 2 detik halaman masih aktif, RawBT kemungkinan tidak terinstall
         setTimeout(function() {
             btn.disabled = false;
             btn.innerHTML = origHTML;
 
-            // Hanya tampilkan fallback jika tab masih fokus (user tidak pindah ke RawBT)
             if (!document.hidden && Date.now() - openedAt < 3500) {
                 var goInstall = confirm(
                     'Aplikasi RawBT tidak terdeteksi di perangkat ini.\n\n' +

@@ -407,8 +407,10 @@
         t += ESC + 'E\x01';
         t += 'TERIMA KASIH!' + LF;
         t += ESC + 'E\x00';
-        t += 'Simpan struk ini sebagai' + LF;
-        t += 'bukti pengambilan.' + LF;
+        t += center('Tidak Menerima Laundry Pakaian Dalam') + '\n';
+        t += center('Menerima Laundry Alat Gunung') + '\n';
+        t += center('IG : @sheza_laundrysolo') + '\n';
+        t += center('IG : @krabatadventure') + '\n';
         t += LF + LF + LF;
         t += GS + 'V\x41\x03';
         return t;

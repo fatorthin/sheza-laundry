@@ -413,7 +413,6 @@
         t += center('Menerima Laundry Alat Gunung') + '\n';
         t += center('IG : @sheza_laundrysolo') + '\n';
         t += center('IG : @krabatadventure') + '\n';
-        t += LF + LF + LF;
         t += GS + 'V\x41\x03';
         return t;
     }

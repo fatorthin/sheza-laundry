@@ -35,6 +35,9 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
     Route::post('/orders/{order}/weight', [OrderController::class, 'finalizeWeight'])->name('orders.weight');
+    Route::post('/orders/{order}/items', [OrderController::class, 'addItem'])->name('orders.items.store');
+    Route::put('/orders/{order}/items/{item}', [OrderController::class, 'updateItem'])->name('orders.items.update');
+    Route::delete('/orders/{order}/items/{item}', [OrderController::class, 'deleteItem'])->name('orders.items.destroy');
 
     // Receipt print
     Route::get('/orders/{order}/receipt', [ReceiptController::class, 'show'])->name('receipt');

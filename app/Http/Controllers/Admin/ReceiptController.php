@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\File;
 
 class ReceiptController extends Controller
 {
@@ -19,6 +21,48 @@ class ReceiptController extends Controller
      * RawBT fetches this directly — no URL-encoding corruption.
      */
     public function printEscPos(Order $order): Response
+    {
+        $data = $this->buildEscPosBinary($order);
+
+        return response($data, 200, [
+            'Content-Type'        => 'application/octet-stream',
+            'Content-Disposition' => 'inline; filename="receipt.bin"',
+            'Cache-Control'       => 'no-store',
+        ]);
+    }
+
+    /**
+     * Build ESC/POS and save as downloadable .bin file.
+     */
+    public function saveEscPos(Order $order): JsonResponse
+    {
+        $data = $this->buildEscPosBinary($order);
+
+        $dir = public_path('temp/escpos');
+        if (! File::exists($dir)) {
+            File::makeDirectory($dir, 0755, true);
+        }
+
+        $safeOrderNumber = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) $order->order_number);
+        $safeOrderNumber = trim($safeOrderNumber ?? 'order', '-');
+        if ($safeOrderNumber === '') {
+            $safeOrderNumber = 'order';
+        }
+
+        $filename = 'receipt-' . $safeOrderNumber . '-' . now()->format('YmdHis') . '.bin';
+        $filePath = $dir . DIRECTORY_SEPARATOR . $filename;
+
+        File::put($filePath, $data);
+
+        return response()->json([
+            'ok' => true,
+            'file_name' => $filename,
+            'file_url' => url('temp/escpos/' . $filename),
+            'bytes' => strlen($data),
+        ]);
+    }
+
+    private function buildEscPosBinary(Order $order): string
     {
         $order->load(['member', 'items.service', 'user']);
 
@@ -60,9 +104,8 @@ class ReceiptController extends Controller
             if ($img) {
                 $origW = imagesx($img);
                 $origH = imagesy($img);
-                // maxWidth = 96px, mode double-width (m=1) → prints as 192 physical dots
-                // This halves the raster bytes (720 vs 2880) AND avoids the null mode byte
-                $maxW  = 96;
+                // Use 192px for clearer logo on 58mm paper.
+                $maxW  = 192;
                 $ratio = $origW > $maxW ? $maxW / $origW : 1.0;
                 $w     = max(1, (int) floor($origW * $ratio));
                 $h     = max(1, (int) floor($origH * $ratio));
@@ -82,7 +125,7 @@ class ReceiptController extends Controller
                         $g   = ($rgb >>  8) & 0xFF;
                         $b   = $rgb         & 0xFF;
                         $lum = 0.299 * $r + 0.587 * $g + 0.114 * $b;
-                        if ($lum < 128) {
+                        if ($lum < 150) {
                             $offset = $y * $widthBytes + ($x >> 3);
                             $rasterBytes[$offset] = chr(ord($rasterBytes[$offset]) | (0x80 >> ($x & 7)));
                         }
@@ -95,8 +138,8 @@ class ReceiptController extends Controller
                 $yL = $h & 0xFF;
                 $yH = ($h >> 8) & 0xFF;
 
-                // mode \x01 = double-width (prints 2× wider, avoids null mode byte \x00)
-                $data .= $GS . 'v0' . chr(1) . chr($xL) . chr($xH) . chr($yL) . chr($yH) . $rasterBytes;
+                // mode \x00 = normal size (clearer than double-width stretch)
+                $data .= $GS . 'v0' . chr(0) . chr($xL) . chr($xH) . chr($yL) . chr($yH) . $rasterBytes;
                 $data .= $LF . $LF;
             }
         }
@@ -157,15 +200,11 @@ class ReceiptController extends Controller
         $data .= $center('Menerima Laundry Alat Gunung') . $LF;
         $data .= $center('IG : @sheza_laundrysolo') . $LF;
         $data .= $center('IG : @krabatadventure') . $LF;
-
-        $data .= $LF . $LF . $LF;
+        $data .= $sep . $LF;
+        $data .= $center('Dicetak: ' . now()->translatedFormat('d F Y H:i')) . $LF;
         // Cut paper
         $data .= $GS . 'V' . "\x41" . "\x03";
 
-        return response($data, 200, [
-            'Content-Type'        => 'application/octet-stream',
-            'Content-Disposition' => 'inline; filename="receipt.bin"',
-            'Cache-Control'       => 'no-store',
-        ]);
+        return $data;
     }
 }

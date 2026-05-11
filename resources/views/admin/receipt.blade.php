@@ -291,7 +291,7 @@
 </body>
 
 @php
-    $escPosUrl = \Illuminate\Support\Facades\URL::signedRoute('receipt.escpos', ['order' => $order->id]);
+    $escPosSaveUrl = route('admin.receipt.escpos.save', ['order' => $order->id]);
     $receiptData = [
         'order_number' => $order->order_number,
         'created_at' => $order->created_at->translatedFormat('d F Y H:i'),
@@ -326,7 +326,7 @@
 @endphp
 <script>
     // ── Data dari server ─────────────────────────────────────────────────
-    const ESCPOS_URL = @json($escPosUrl);
+    const ESCPOS_SAVE_URL = @json($escPosSaveUrl);
     const RECEIPT = @json($receiptData);
 
     // Tampilkan waktu cetak
@@ -571,32 +571,34 @@
         btn.textContent = 'Menyiapkan cetak...';
 
         try {
-            // Fetch raw ESC/POS binary dari server (bytes > 127 aman karena ArrayBuffer)
-            var response = await fetch(ESCPOS_URL);
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            var buffer = await response.arrayBuffer();
-            var bytes = new Uint8Array(buffer);
-
-            // Single-byte percent-encoding — rawbt: butuh Latin-1, bukan UTF-8
-            // encodeURIComponent salah karena encode 0x80 → %C2%80 (2 byte, rusak bitmap)
-            var safe = /[A-Za-z0-9\-_.~]/;
-            var encoded = '';
-            for (var i = 0; i < bytes.length; i++) {
-                var c = bytes[i];
-                if (c < 128 && safe.test(String.fromCharCode(c))) {
-                    encoded += String.fromCharCode(c);
-                } else {
-                    encoded += '%' + c.toString(16).toUpperCase().padStart(2, '0');
+            // Simpan binary di server lalu unduh file .bin untuk dicetak via menu "Print from file" di RawBT.
+            var response = await fetch(ESCPOS_SAVE_URL, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
-            }
+            });
+            if (!response.ok) throw new Error('HTTP ' + response.status);
 
-            btn.textContent = 'Membuka RawBT...';
-            console.log('[rawbt] encoded bytes:', bytes.length, 'encoded url chars:', encoded.length);
-            window.location.href = 'rawbt:' + encoded;
+            var json = await response.json();
+            if (!json || !json.file_url) throw new Error('Invalid save-escpos response');
+
+            btn.textContent = 'Mengunduh file .bin...';
+
+            var a = document.createElement('a');
+            a.href = json.file_url + '?t=' + Date.now();
+            a.download = json.file_name || ('receipt-' + RECEIPT.order_number + '.bin');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            setTimeout(function() {
+                alert(
+                    'File struk (.bin) sudah terunduh. Buka RawBT > Print from file/document > pilih file tersebut.');
+            }, 300);
 
         } catch (e) {
-            console.error('ESC/POS fetch error, fallback plain text:', e);
-            // Fallback: teks saja (tanpa logo) — ASCII only, encodeURIComponent aman
+            console.error('ESC/POS save-file error, fallback plain text:', e);
             btn.textContent = 'Membuka RawBT...';
             window.location.href = 'rawbt:' + encodeURIComponent(buildPlainText(RECEIPT));
         }

@@ -38,6 +38,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Receipt print
     Route::get('/orders/{order}/receipt', [ReceiptController::class, 'show'])->name('receipt');
+    Route::get('/orders/{order}/receipt/save-escpos', [ReceiptController::class, 'saveEscPos'])->name('receipt.escpos.save');
 
     // Members
     Route::get('/members', [MemberController::class, 'index'])->name('members');

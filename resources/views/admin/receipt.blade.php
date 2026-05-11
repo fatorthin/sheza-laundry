@@ -539,7 +539,7 @@
         t += SEP + '\n';
         t += c2('Tgl Selesai:', d.finish_at) + '\n';
         t += SEP + '\n';
-        t += center('TERIMAKASIH') + '\n';
+        t += center('TERIMA KASIH') + '\n';
         t += center('Tidak Menerima Laundry Pakaian Dalam') + '\n';
         t += center('Menerima Laundry Alat Gunung') + '\n';
         t += center('IG : @sheza_laundrysolo') + '\n';
@@ -549,7 +549,7 @@
         var tsCetak = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' +
             now.getFullYear() + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(
                 2, '0');
-        t += center('Dicetak: ' + tsCetak) + '\n';
+        t += center('Dicetak: ' + tsCetak);
         return t;
     }
 

@@ -39,6 +39,11 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Receipt print
     Route::get('/orders/{order}/receipt', [ReceiptController::class, 'show'])->name('receipt');
 
+    // ESC/POS binary endpoint (signed URL, accessible by RawBT without session)
+    Route::get('/print/{order}/escpos', [ReceiptController::class, 'printEscPos'])
+        ->name('receipt.escpos')
+        ->middleware('signed');
+
     // Members
     Route::get('/members', [MemberController::class, 'index'])->name('members');
     Route::post('/members', [MemberController::class, 'store'])->name('members.store');

@@ -291,41 +291,11 @@
 </body>
 
 @php
-    $receiptData = [
-        'order_number' => $order->order_number,
-        'created_at' => $order->created_at->translatedFormat('d F Y H:i'),
-        'finish_at' => $order->ready_at
-            ? $order->ready_at->translatedFormat('d F Y')
-            : $order->created_at->addDays($order->is_express ? 1 : 3)->translatedFormat('d F Y'),
-        'cashier' => $order->user?->name ?? 'Admin',
-        'customer' => strtoupper($order->member?->name ?? 'TAMU'),
-        'items' => $order->items
-            ->map(function ($item) {
-                return [
-                    'name' => $item->service_name,
-                    'qty' =>
-                        $item->service_type === 'kiloan'
-                            ? ($item->weight
-                                ? $item->weight . 'kg'
-                                : '?kg')
-                            : intval($item->quantity) . 'x',
-                    'subtotal' =>
-                        $item->service_type === 'kiloan' && !$item->weight
-                            ? 'TBD'
-                            : number_format($item->subtotal, 0, ',', '.'),
-                ];
-            })
-            ->values()
-            ->toArray(),
-        'total' => number_format($order->total, 0, ',', '.'),
-        'payment_status' => $order->payment_status,
-        'payment_method' => $order->payment_method ?? 'tunai',
-        'paid_amount' => number_format($order->paid_amount ?? $order->total, 0, ',', '.'),
-    ];
+    $escPosUrl = \Illuminate\Support\Facades\URL::signedRoute('receipt.escpos', ['order' => $order->id]);
 @endphp
 <script>
-    // ── Data dari server ─────────────────────────────────────────────────
-    const RECEIPT = @json($receiptData);
+    // ── ESC/POS binary URL (server-side, fetched by RawBT) ───────────────
+    const ESCPOS_URL = @json($escPosUrl);
 
     // Tampilkan waktu cetak
     (function() {
@@ -562,28 +532,16 @@
         var origHTML = btn.innerHTML;
 
         btn.disabled = true;
-        btn.textContent = 'Menyiapkan cetak...';
-
-        var payload;
-        try {
-            payload = await buildEscPosWithLogo(RECEIPT, '/logo-sheza-1bit.png');
-        } catch (e) {
-            payload = buildPlainText(RECEIPT);
-        }
-
         btn.textContent = 'Membuka RawBT...';
 
+        // RawBT fetches the binary ESC/POS directly from the server URL.
+        // This avoids encodeURIComponent corrupting bytes > 127 in bitmap data.
         var openedAt = Date.now();
-        window.location.href = 'rawbt:' + encodeURIComponent(payload);
+        window.location.href = 'rawbt:' + ESCPOS_URL;
 
-        // Jika setelah 2 detik halaman masih aktif, RawBT kemungkinan tidak terinstall
         setTimeout(function() {
             btn.disabled = false;
             btn.innerHTML = origHTML;
-
-            if (!document.hidden && Date.now() - openedAt < 3500) {
-                // window.print();
-            }
         }, 2000);
     }
 </script>

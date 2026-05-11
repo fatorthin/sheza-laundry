@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('order_number')->unique();
             $table->foreignId('member_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->enum('status', ['baru', 'dicuci', 'disetrika', 'siap_diambil', 'selesai'])->default('baru');
+            $table->enum('status', ['baru', 'dikerjakan', 'siap_diambil', 'selesai'])->default('baru');
             $table->enum('payment_status', ['belum_bayar', 'lunas'])->default('belum_bayar');
             $table->enum('payment_method', ['tunai', 'transfer', 'qris'])->nullable();
             $table->decimal('weight', 8, 2)->nullable();

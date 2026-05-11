@@ -67,8 +67,7 @@ class Order extends Model
     {
         return match ($this->status) {
             'baru'          => 'Baru',
-            'dicuci'        => 'Dicuci',
-            'disetrika'     => 'Disetrika',
+            'dikerjakan'    => 'Dikerjakan',
             'siap_diambil'  => 'Siap Diambil',
             'selesai'       => 'Selesai',
             default         => $this->status,
@@ -79,8 +78,7 @@ class Order extends Model
     {
         return match ($this->status) {
             'baru'         => 'blue',
-            'dicuci'       => 'yellow',
-            'disetrika'    => 'orange',
+            'dikerjakan'   => 'yellow',
             'siap_diambil' => 'green',
             'selesai'      => 'gray',
             default        => 'gray',

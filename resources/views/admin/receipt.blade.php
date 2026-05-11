@@ -292,10 +292,42 @@
 
 @php
     $escPosUrl = \Illuminate\Support\Facades\URL::signedRoute('receipt.escpos', ['order' => $order->id]);
+    $receiptData = [
+        'order_number' => $order->order_number,
+        'created_at' => $order->created_at->translatedFormat('d F Y H:i'),
+        'finish_at' => $order->ready_at
+            ? $order->ready_at->translatedFormat('d F Y')
+            : $order->created_at->addDays($order->is_express ? 1 : 3)->translatedFormat('d F Y'),
+        'cashier' => $order->user?->name ?? 'Admin',
+        'customer' => strtoupper($order->member?->name ?? 'TAMU'),
+        'items' => $order->items
+            ->map(function ($item) {
+                return [
+                    'name' => $item->service_name,
+                    'qty' =>
+                        $item->service_type === 'kiloan'
+                            ? ($item->weight
+                                ? $item->weight . 'kg'
+                                : '?kg')
+                            : intval($item->quantity) . 'x',
+                    'subtotal' =>
+                        $item->service_type === 'kiloan' && !$item->weight
+                            ? 'TBD'
+                            : number_format($item->subtotal, 0, ',', '.'),
+                ];
+            })
+            ->values()
+            ->toArray(),
+        'total' => number_format($order->total, 0, ',', '.'),
+        'payment_status' => $order->payment_status,
+        'payment_method' => $order->payment_method ?? 'tunai',
+        'paid_amount' => number_format($order->paid_amount ?? $order->total, 0, ',', '.'),
+    ];
 @endphp
 <script>
-    // ── ESC/POS binary URL (server-side, fetched by RawBT) ───────────────
+    // ── Data dari server ─────────────────────────────────────────────────
     const ESCPOS_URL = @json($escPosUrl);
+    const RECEIPT = @json($receiptData);
 
     // Tampilkan waktu cetak
     (function() {
@@ -532,12 +564,37 @@
         var origHTML = btn.innerHTML;
 
         btn.disabled = true;
-        btn.textContent = 'Membuka RawBT...';
+        btn.textContent = 'Menyiapkan cetak...';
 
-        // RawBT fetches the binary ESC/POS directly from the server URL.
-        // This avoids encodeURIComponent corrupting bytes > 127 in bitmap data.
-        var openedAt = Date.now();
-        window.location.href = 'rawbt:' + ESCPOS_URL;
+        try {
+            // Fetch raw ESC/POS binary dari server (bytes > 127 aman karena ArrayBuffer)
+            var response = await fetch(ESCPOS_URL);
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            var buffer = await response.arrayBuffer();
+            var bytes = new Uint8Array(buffer);
+
+            // Single-byte percent-encoding — rawbt: butuh Latin-1, bukan UTF-8
+            // encodeURIComponent salah karena encode 0x80 → %C2%80 (2 byte, rusak bitmap)
+            var safe = /[A-Za-z0-9\-_.~]/;
+            var encoded = '';
+            for (var i = 0; i < bytes.length; i++) {
+                var c = bytes[i];
+                if (c < 128 && safe.test(String.fromCharCode(c))) {
+                    encoded += String.fromCharCode(c);
+                } else {
+                    encoded += '%' + c.toString(16).toUpperCase().padStart(2, '0');
+                }
+            }
+
+            btn.textContent = 'Membuka RawBT...';
+            window.location.href = 'rawbt:' + encoded;
+
+        } catch (e) {
+            console.error('ESC/POS fetch error, fallback plain text:', e);
+            // Fallback: teks saja (tanpa logo) — ASCII only, encodeURIComponent aman
+            btn.textContent = 'Membuka RawBT...';
+            window.location.href = 'rawbt:' + encodeURIComponent(buildPlainText(RECEIPT));
+        }
 
         setTimeout(function() {
             btn.disabled = false;

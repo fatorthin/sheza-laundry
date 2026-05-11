@@ -413,6 +413,11 @@
         t += center('Menerima Laundry Alat Gunung') + '\n';
         t += center('IG : @sheza_laundrysolo') + '\n';
         t += center('IG : @krabatadventure') + '\n';
+        var now = new Date();
+        var tsCetak = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' +
+            now.getFullYear() + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(
+                2, '0');
+        t += center('Dicetak: ' + tsCetak);
         t += GS + 'V\x41\x03';
         return t;
     }
@@ -586,6 +591,7 @@
             }
 
             btn.textContent = 'Membuka RawBT...';
+            console.log('[rawbt] encoded bytes:', bytes.length, 'encoded url chars:', encoded.length);
             window.location.href = 'rawbt:' + encoded;
 
         } catch (e) {

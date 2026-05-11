@@ -60,7 +60,9 @@ class ReceiptController extends Controller
             if ($img) {
                 $origW = imagesx($img);
                 $origH = imagesy($img);
-                $maxW  = 192; // px for 58mm printer
+                // maxWidth = 96px, mode double-width (m=1) → prints as 192 physical dots
+                // This halves the raster bytes (720 vs 2880) AND avoids the null mode byte
+                $maxW  = 96;
                 $ratio = $origW > $maxW ? $maxW / $origW : 1.0;
                 $w     = max(1, (int) floor($origW * $ratio));
                 $h     = max(1, (int) floor($origH * $ratio));
@@ -80,7 +82,7 @@ class ReceiptController extends Controller
                         $g   = ($rgb >>  8) & 0xFF;
                         $b   = $rgb         & 0xFF;
                         $lum = 0.299 * $r + 0.587 * $g + 0.114 * $b;
-                        if ($lum < 170) {
+                        if ($lum < 128) {
                             $offset = $y * $widthBytes + ($x >> 3);
                             $rasterBytes[$offset] = chr(ord($rasterBytes[$offset]) | (0x80 >> ($x & 7)));
                         }
@@ -93,7 +95,8 @@ class ReceiptController extends Controller
                 $yL = $h & 0xFF;
                 $yH = ($h >> 8) & 0xFF;
 
-                $data .= $GS . 'v0' . chr(0) . chr($xL) . chr($xH) . chr($yL) . chr($yH) . $rasterBytes;
+                // mode \x01 = double-width (prints 2× wider, avoids null mode byte \x00)
+                $data .= $GS . 'v0' . chr(1) . chr($xL) . chr($xH) . chr($yL) . chr($yH) . $rasterBytes;
                 $data .= $LF . $LF;
             }
         }

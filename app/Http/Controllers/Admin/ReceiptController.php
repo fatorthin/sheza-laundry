@@ -115,9 +115,7 @@ class ReceiptController extends Controller
                 imagecopyresampled($thumb, $img, 0, 0, 0, 0, $w, $h, $origW, $origH);
                 imagedestroy($img);
 
-                $widthBytes  = (int) ceil($w / 8);
-                $rasterBytes = str_repeat("\x00", $widthBytes * $h);
-
+                $pixels = array_fill(0, $h, array_fill(0, $w, 0));
                 for ($y = 0; $y < $h; $y++) {
                     for ($x = 0; $x < $w; $x++) {
                         $rgb = imagecolorat($thumb, $x, $y);
@@ -125,22 +123,33 @@ class ReceiptController extends Controller
                         $g   = ($rgb >>  8) & 0xFF;
                         $b   = $rgb         & 0xFF;
                         $lum = 0.299 * $r + 0.587 * $g + 0.114 * $b;
-                        if ($lum < 150) {
-                            $offset = $y * $widthBytes + ($x >> 3);
-                            $rasterBytes[$offset] = chr(ord($rasterBytes[$offset]) | (0x80 >> ($x & 7)));
-                        }
+                        $pixels[$y][$x] = $lum < 150 ? 1 : 0;
                     }
                 }
                 imagedestroy($thumb);
 
-                $xL = $widthBytes & 0xFF;
-                $xH = ($widthBytes >> 8) & 0xFF;
-                $yL = $h & 0xFF;
-                $yH = ($h >> 8) & 0xFF;
-
-                // mode \x00 = normal size (clearer than double-width stretch)
-                $data .= $GS . 'v0' . chr(0) . chr($xL) . chr($xH) . chr($yL) . chr($yH) . $rasterBytes;
-                $data .= $LF . $LF;
+                // ESC * (24-dot double density) is usually more compatible than GS v 0.
+                $nL = $w & 0xFF;
+                $nH = ($w >> 8) & 0xFF;
+                $data .= $ESC . '3' . chr(24);
+                for ($y = 0; $y < $h; $y += 24) {
+                    $data .= $ESC . '*' . chr(33) . chr($nL) . chr($nH);
+                    for ($x = 0; $x < $w; $x++) {
+                        for ($k = 0; $k < 3; $k++) {
+                            $byte = 0;
+                            for ($b = 0; $b < 8; $b++) {
+                                $yy = $y + ($k * 8) + $b;
+                                if ($yy < $h && $pixels[$yy][$x] === 1) {
+                                    $byte |= (0x80 >> $b);
+                                }
+                            }
+                            $data .= chr($byte);
+                        }
+                    }
+                    $data .= $LF;
+                }
+                $data .= $ESC . '2';
+                $data .= $LF;
             }
         }
 

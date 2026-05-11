@@ -27,11 +27,9 @@ class OrderBoard extends Component
         'selesai'      => 'Selesai',
     ];
 
-    // Label map for all internal DB status values (incl. legacy dicuci/disetrika)
+    // Label map for internal DB status values.
     private array $statusLabels = [
         'baru'         => 'Baru',
-        'dicuci'       => 'Dikerjakan',
-        'disetrika'    => 'Dikerjakan',
         'dikerjakan'   => 'Dikerjakan',
         'siap_diambil' => 'Siap Diambil',
         'selesai'      => 'Selesai',
@@ -57,9 +55,7 @@ class OrderBoard extends Component
             })
             ->latest()
             ->get()
-            ->groupBy(function ($order) {
-                return in_array($order->status, ['dicuci', 'disetrika']) ? 'dikerjakan' : $order->status;
-            });
+            ->groupBy('status');
     }
 
     #[Computed]
@@ -130,6 +126,19 @@ class OrderBoard extends Component
                 'payment_method' => $paymentMethod,
             ]);
         }
+    }
+
+    public function resendInvoiceWhatsApp(int $orderId): void
+    {
+        $order = Order::with(['member', 'items', 'user'])->findOrFail($orderId);
+
+        $phone = $order->member?->phone;
+        if (!$phone) {
+            return;
+        }
+
+        // Reuse the same flow used when order is ready: text + invoice image.
+        SendWhatsAppNotification::dispatch('ready_pickup', $phone, $order);
     }
 
     public function deleteOrder(int $orderId): void

@@ -6,221 +6,139 @@ use App\Models\Order;
 
 class InvoiceImageService
 {
-    private int $width   = 520;
-    private int $padding = 24;
-    private string $fontRegular;
-    private string $fontBold;
-
-    public function __construct()
-    {
-        $this->fontRegular = $this->findFont(false);
-        $this->fontBold    = $this->findFont(true);
-    }
+    private int $padding = 12;
+    private int $font = 3;
+    private int $charsPerLine = 44;
 
     /**
      * Generate a PNG invoice image for the given order and return it base64-encoded.
      */
     public function generateBase64(Order $order): string
     {
-        $order->loadMissing(['member', 'items']);
+        $order->loadMissing(['member', 'items', 'user']);
 
-        $items    = $order->items;
-        $hasNotes = !empty($order->notes);
+        $lines = $this->buildReceiptLines($order);
+        $lineHeight = imagefontheight($this->font) + 6;
+        $charWidth = imagefontwidth($this->font);
+        $contentWidth = $charWidth * $this->charsPerLine;
 
-        // Dynamic height
-        $height = 340 + ($items->count() * 42) + ($hasNotes ? 32 : 0) + 40;
-
-        $img = imagecreatetruecolor($this->width, $height);
-
-        // ── Colour palette ───────────────────────────────────────────────────
-        $cWhite      = imagecolorallocate($img, 255, 255, 255);
-        $cBlack      = imagecolorallocate($img, 26,  26,  26);
-        $cDark       = imagecolorallocate($img, 50,  50,  50);
-        $cGray       = imagecolorallocate($img, 130, 130, 130);
-        $cAmber      = imagecolorallocate($img, 245, 158, 11);
-        $cAmberLight = imagecolorallocate($img, 255, 236, 153);
-        $cBg         = imagecolorallocate($img, 255, 251, 235);
-        $cBorder     = imagecolorallocate($img, 229, 229, 229);
-        $cShadow     = imagecolorallocate($img, 215, 200, 180);
-
-        // ── Background ───────────────────────────────────────────────────────
-        imagefill($img, 0, 0, $cWhite);
-
-        // ── Header bar ───────────────────────────────────────────────────────
-        imagefilledrectangle($img, 0, 0, $this->width, 76, $cAmber);
-
-        $useTtf = $this->fontRegular !== '' && $this->fontBold !== '';
-
-        if ($useTtf) {
-            imagettftext($img, 21, 0, $this->padding, 42, $cWhite,      $this->fontBold,    'SHEZA LAUNDRY');
-            imagettftext($img, 10, 0, $this->padding, 65, $cAmberLight, $this->fontRegular, 'Nota / Invoice Laundry');
-        } else {
-            imagestring($img, 5, $this->padding, 14, 'SHEZA LAUNDRY',          $cWhite);
-            imagestring($img, 3, $this->padding, 40, 'Nota / Invoice Laundry', $cAmberLight);
+        $logoPath = public_path('logo-sheza-1bit.png');
+        if (!file_exists($logoPath)) {
+            $logoPath = public_path('logo-sheza.png');
         }
 
-        $y = 90;
-
-        // ── Meta rows ────────────────────────────────────────────────────────
-        $y = $this->row($img, $y, 'No. Order',  $order->order_number,                              $cGray, $cAmber, $useTtf);
-        $y = $this->row($img, $y, 'Tanggal',    $order->created_at->format('d M Y, H:i'),          $cGray, $cDark,  $useTtf);
-        $y = $this->row($img, $y, 'Pelanggan',  $order->member?->name ?? 'Tamu',                   $cGray, $cDark,  $useTtf);
-
-        if ($order->member?->phone) {
-            $y = $this->row($img, $y, 'No. HP', $order->member->phone, $cGray, $cDark, $useTtf);
-        }
-
-        if ($order->has_kiloan && (float) ($order->weight ?? 0) > 0) {
-            $y = $this->row(
-                $img,
-                $y,
-                'Berat',
-                number_format((float) $order->weight, 1, ',', '.') . ' kg',
-                $cGray,
-                $cDark,
-                $useTtf
-            );
-        }
-
-        if ($order->is_express ?? false) {
-            $y = $this->row($img, $y, 'Jenis', 'EXPRESS', $cGray, $cAmber, $useTtf);
-        }
-
-        $y += 8;
-        $this->dashed($img, $y, $cBorder);
-        $y += 14;
-
-        // ── Items header ─────────────────────────────────────────────────────
-        if ($useTtf) {
-            imagettftext($img, 9, 0, $this->padding, $y + 11, $cGray, $this->fontBold, 'ITEM PESANAN');
-        } else {
-            imagestring($img, 2, $this->padding, $y, 'ITEM PESANAN', $cGray);
-        }
-        $y += 16;
-        $this->dashed($img, $y, $cBorder);
-        $y += 10;
-
-        // ── Items list ───────────────────────────────────────────────────────
-        foreach ($items as $item) {
-            $name = $this->truncate($item->service_name, 36);
-
-            if ($item->service_type === 'kiloan') {
-                $qty = number_format((float) ($item->weight ?? $item->quantity), 1, ',', '.') . ' kg';
+        $logo = null;
+        $logoWidth = 0;
+        $logoHeight = 0;
+        if (file_exists($logoPath)) {
+            $logo = @imagecreatefrompng($logoPath);
+            if ($logo !== false) {
+                $logoWidth = imagesx($logo);
+                $logoHeight = imagesy($logo);
+                $maxLogoWidth = 180;
+                if ($logoWidth > $maxLogoWidth) {
+                    $ratio = $maxLogoWidth / $logoWidth;
+                    $logoWidth = (int) floor($logoWidth * $ratio);
+                    $logoHeight = (int) floor($logoHeight * $ratio);
+                }
             } else {
-                $qty = number_format((int) $item->quantity, 0) . ' pcs';
+                $logo = null;
             }
+        }
 
-            $price    = 'Rp ' . number_format((float) $item->price, 0, ',', '.');
-            $subtotal = 'Rp ' . number_format((float) $item->subtotal, 0, ',', '.');
+        $qrisPath = public_path('qris-sheza.png');
+        $qris = null;
+        $qrisWidth = 0;
+        $qrisHeight = 0;
+        if (file_exists($qrisPath)) {
+            $qris = @imagecreatefrompng($qrisPath);
+            if ($qris !== false) {
+                $qrisWidth = imagesx($qris);
+                $qrisHeight = imagesy($qris);
+                $maxQrisWidth = min(260, $contentWidth);
+                if ($qrisWidth > $maxQrisWidth) {
+                    $ratio = $maxQrisWidth / $qrisWidth;
+                    $qrisWidth = (int) floor($qrisWidth * $ratio);
+                    $qrisHeight = (int) floor($qrisHeight * $ratio);
+                }
+            } else {
+                $qris = null;
+            }
+        }
 
-            if ($useTtf) {
-                imagettftext($img, 10, 0, $this->padding, $y + 13, $cBlack, $this->fontBold,    $name);
-                imagettftext(
+        $contentBlockWidth = max($contentWidth, $logoWidth, $qrisWidth);
+        $canvasWidth = $contentBlockWidth + ($this->padding * 2);
+        $height = $this->padding
+            + ($logo ? $logoHeight + 14 : 0)
+            + (count($lines) * $lineHeight)
+            + ($qris ? (24 + $lineHeight + $qrisHeight) : 0)
+            + $this->padding;
+
+        $img = imagecreatetruecolor($canvasWidth, $height);
+        $white = imagecolorallocate($img, 255, 255, 255);
+        $black = imagecolorallocate($img, 25, 25, 25);
+        imagefill($img, 0, 0, $white);
+
+        $contentX = (int) floor(($canvasWidth - $contentWidth) / 2);
+        $y = $this->padding;
+
+        if ($logo) {
+            $logoX = (int) floor(($canvasWidth - $logoWidth) / 2);
+
+            if ($logoWidth !== imagesx($logo) || $logoHeight !== imagesy($logo)) {
+                imagecopyresampled(
                     $img,
-                    9,
+                    $logo,
+                    $logoX,
+                    $y,
                     0,
-                    $this->padding + 10,
-                    $y + 27,
-                    $cGray,
-                    $this->fontRegular,
-                    $qty . ' × ' . $price
-                );
-
-                // Right-align subtotal
-                $box  = imagettfbbox(10, 0, $this->fontBold, $subtotal);
-                $tw   = abs($box[4] - $box[0]);
-                imagettftext(
-                    $img,
-                    10,
                     0,
-                    $this->width - $this->padding - $tw,
-                    $y + 13,
-                    $cDark,
-                    $this->fontBold,
-                    $subtotal
+                    $logoWidth,
+                    $logoHeight,
+                    imagesx($logo),
+                    imagesy($logo)
                 );
             } else {
-                imagestring($img, 3, $this->padding, $y + 2,  $name,                    $cBlack);
-                imagestring($img, 2, $this->padding + 8, $y + 16, $qty . ' x ' . $price, $cGray);
-                imagestring($img, 3, $this->width - 120, $y + 2, $subtotal,              $cDark);
+                imagecopy($img, $logo, $logoX, $y, 0, 0, $logoWidth, $logoHeight);
             }
 
-            $y += 40;
+            imagedestroy($logo);
+            $y += $logoHeight + 14;
         }
 
-        $y += 4;
-        $this->dashed($img, $y, $cBorder);
-        $y += 10;
-
-        // ── Total block ──────────────────────────────────────────────────────
-        imagefilledrectangle($img, $this->padding - 8, $y, $this->width - $this->padding + 8, $y + 44, $cBg);
-
-        $totalText = 'Rp ' . number_format((float) $order->total, 0, ',', '.');
-
-        if ($useTtf) {
-            imagettftext($img, 12, 0, $this->padding, $y + 28, $cDark, $this->fontBold, 'TOTAL');
-
-            $box = imagettfbbox(15, 0, $this->fontBold, $totalText);
-            $tw  = abs($box[4] - $box[0]);
-            imagettftext(
-                $img,
-                15,
-                0,
-                $this->width - $this->padding - $tw,
-                $y + 30,
-                $cAmber,
-                $this->fontBold,
-                $totalText
-            );
-        } else {
-            imagestring($img, 4, $this->padding, $y + 14, 'TOTAL: ' . $totalText, $cAmber);
+        foreach ($lines as $line) {
+            imagestring($img, $this->font, $contentX, $y, $line, $black);
+            $y += $lineHeight;
         }
 
-        $y += 56;
+        if ($qris) {
+            $y += 12;
+            $caption = 'Scan QRIS untuk pembayaran';
+            $captionX = (int) floor(($canvasWidth - (strlen($caption) * $charWidth)) / 2);
+            imagestring($img, $this->font, $captionX, $y, $caption, $black);
+            $y += $lineHeight;
 
-        // ── Notes ────────────────────────────────────────────────────────────
-        if ($hasNotes) {
-            if ($useTtf) {
-                imagettftext(
+            $qrisX = (int) floor(($canvasWidth - $qrisWidth) / 2);
+            if ($qrisWidth !== imagesx($qris) || $qrisHeight !== imagesy($qris)) {
+                imagecopyresampled(
                     $img,
-                    9,
+                    $qris,
+                    $qrisX,
+                    $y,
                     0,
-                    $this->padding,
-                    $y + 12,
-                    $cGray,
-                    $this->fontRegular,
-                    'Catatan: ' . $this->truncate($order->notes, 60)
+                    0,
+                    $qrisWidth,
+                    $qrisHeight,
+                    imagesx($qris),
+                    imagesy($qris)
                 );
             } else {
-                imagestring($img, 2, $this->padding, $y, 'Catatan: ' . $order->notes, $cGray);
+                imagecopy($img, $qris, $qrisX, $y, 0, 0, $qrisWidth, $qrisHeight);
             }
-            $y += 32;
+
+            imagedestroy($qris);
         }
 
-        $this->dashed($img, $y, $cBorder);
-        $y += 16;
-
-        // ── Footer ───────────────────────────────────────────────────────────
-        $footer = 'Terima kasih telah mempercayakan laundry Anda kepada kami!';
-
-        if ($useTtf) {
-            $box = imagettfbbox(9, 0, $this->fontRegular, $footer);
-            $tw  = abs($box[4] - $box[0]);
-            imagettftext(
-                $img,
-                9,
-                0,
-                (int) (($this->width - $tw) / 2),
-                $y + 14,
-                $cGray,
-                $this->fontRegular,
-                $footer
-            );
-        } else {
-            imagestring($img, 2, $this->padding, $y, $footer, $cGray);
-        }
-
-        // ── Capture PNG ──────────────────────────────────────────────────────
         ob_start();
         imagepng($img);
         $data = ob_get_clean();
@@ -229,64 +147,134 @@ class InvoiceImageService
         return base64_encode($data);
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Helpers
-    // ────────────────────────────────────────────────────────────────────────
+    private function buildReceiptLines(Order $order): array
+    {
+        $w = $this->charsPerLine;
+        $itemCol = 22;
+        $qtyCol = 6;
+        $priceCol = 7;
+        $gapCol = 1;
+        $totalCol = 8;
+        $sep = str_repeat('-', $w);
 
-    private function row(
-        $img,
-        int $y,
-        string $label,
-        string $value,
-        $labelColor,
-        $valueColor,
-        bool $useTtf
-    ): int {
-        if ($useTtf) {
-            imagettftext($img, 9,  0, $this->padding, $y + 13, $labelColor, $this->fontRegular, $label . ':');
-            imagettftext($img, 10, 0, 170,            $y + 13, $valueColor, $this->fontBold,    $value);
-        } else {
-            imagestring($img, 2, $this->padding, $y, $label . ': ' . $value, $labelColor);
+        $createdAt = $order->created_at->translatedFormat('d F Y H:i');
+        $finishAt = $order->ready_at
+            ? $order->ready_at->translatedFormat('j F Y')
+            : $order->created_at->copy()->addDays($order->is_express ? 1 : 3)->translatedFormat('j F Y');
+
+        $cashier = $order->user?->name ?? 'Admin';
+        $customer = strtoupper($order->member?->name ?? 'TAMU');
+
+        $lines = [
+            $this->center('SHEZA LAUNDRY SOLO', $w),
+            $this->center('Jl. Pucangsawit RT 03 RW 03', $w),
+            $this->center('Kec. Jebres, Surakarta', $w),
+            $this->center('Tel: +62 8820-0933-4660', $w),
+            $sep,
+            $this->cols2('Order ID :', $order->order_number, $w),
+            $this->cols2('Tanggal  :', $createdAt, $w),
+            $this->cols2('Kasir    :', $cashier, $w),
+            $this->cols2('Pelanggan:', $customer, $w),
+            $sep,
+            $this->rpad('ITEM', $itemCol)
+                . $this->rpad('QTY', $qtyCol)
+                . $this->lpad('HARGA', $priceCol)
+                . str_repeat(' ', $gapCol)
+                . $this->lpad('SUBTOTAL', $totalCol),
+            $sep,
+        ];
+
+        foreach ($order->items as $item) {
+            $qty = $item->service_type === 'kiloan'
+                ? (($item->weight ? $item->weight . 'kg' : '?kg'))
+                : (intval($item->quantity) . 'x');
+
+            $price = number_format((float) $item->price, 0, ',', '.');
+            $subtotal = ($item->service_type === 'kiloan' && !$item->weight)
+                ? 'TBD'
+                : number_format((float) $item->subtotal, 0, ',', '.');
+
+            $name = $this->truncate($item->service_name, $itemCol);
+
+            $lines[] = $this->rpad($name, $itemCol)
+                . $this->rpad($qty, $qtyCol)
+                . $this->lpad($price, $priceCol)
+                . str_repeat(' ', $gapCol)
+                . $this->lpad($subtotal, $totalCol);
         }
-        return $y + 22;
+
+        $lines[] = $sep;
+        $lines[] = $this->cols2('TOTAL    :', 'Rp ' . number_format((float) $order->total, 0, ',', '.'), $w);
+
+        if ($order->payment_status === 'lunas') {
+            $lines[] = $sep;
+            $lines[] = $this->cols2(
+                'DIBAYAR (' . strtoupper($order->payment_method ?? 'tunai') . '):',
+                'Rp ' . number_format((float) ($order->paid_amount ?? $order->total), 0, ',', '.'),
+                $w
+            );
+        }
+
+        $lines[] = $sep;
+        $lines[] = $this->cols2('Tgl Selesai:', $finishAt, $w);
+        $lines[] = $sep;
+        $lines[] = $this->center('TERIMAKASIH', $w);
+        $lines[] = $this->center('Tidak Menerima Laundry Pakaian Dalam', $w);
+        $lines[] = $this->center('Menerima Laundry Alat Gunung', $w);
+        $lines[] = $this->center('IG : @sheza_laundrysolo', $w);
+        $lines[] = $this->center('IG : @krabatadventure', $w);
+        $lines[] = $sep;
+        $lines[] = $this->center('Dicetak: ' . now()->translatedFormat('d F Y H:i'), $w);
+
+        return $lines;
     }
 
-    private function dashed($img, int $y, $color): void
+    private function rpad(string $s, int $n): string
     {
-        $dash = 6;
-        $gap = 4;
-        for ($x = $this->padding; $x < $this->width - $this->padding; $x += $dash + $gap) {
-            imageline($img, $x, $y, min($x + $dash - 1, $this->width - $this->padding), $y, $color);
-        }
+        $s = trim($s);
+        return mb_strlen($s) >= $n ? mb_substr($s, 0, $n) : str_pad($s, $n, ' ', STR_PAD_RIGHT);
     }
 
-    private function findFont(bool $bold): string
+    private function lpad(string $s, int $n): string
     {
-        $paths = $bold
-            ? [
-                'C:/Windows/Fonts/calibrib.ttf',
-                'C:/Windows/Fonts/arialbd.ttf',
-                'C:/Windows/Fonts/verdanab.ttf',
-                '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-                '/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf',
-            ]
-            : [
-                'C:/Windows/Fonts/calibri.ttf',
-                'C:/Windows/Fonts/arial.ttf',
-                'C:/Windows/Fonts/verdana.ttf',
-                '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-                '/usr/share/fonts/dejavu/DejaVuSans.ttf',
-            ];
+        $s = trim($s);
+        return mb_strlen($s) >= $n ? mb_substr($s, 0, $n) : str_pad($s, $n, ' ', STR_PAD_LEFT);
+    }
 
-        foreach ($paths as $p) {
-            if (file_exists($p)) return $p;
+    private function cols2(string $a, string $b, int $w): string
+    {
+        $a = trim($a);
+        $b = trim($b);
+
+        if ((mb_strlen($a) + mb_strlen($b) + 1) > $w) {
+            $a = mb_substr($a, 0, max(0, $w - mb_strlen($b) - 1));
         }
-        return '';
+
+        $space = max(1, $w - mb_strlen($a) - mb_strlen($b));
+        return $a . str_repeat(' ', $space) . $b;
+    }
+
+    private function center(string $s, int $w): string
+    {
+        $s = trim($s);
+        if (mb_strlen($s) >= $w) {
+            return mb_substr($s, 0, $w);
+        }
+
+        $pad = (int) floor(($w - mb_strlen($s)) / 2);
+        return str_repeat(' ', $pad) . $s;
     }
 
     private function truncate(string $str, int $max): string
     {
-        if (mb_strlen($str) <= $max) return $str;
+        if (mb_strlen($str) <= $max) {
+            return $str;
+        }
+
+        if ($max <= 3) {
+            return mb_substr($str, 0, $max);
+        }
+
         return mb_substr($str, 0, $max - 3) . '...';
     }
 }

@@ -193,14 +193,15 @@
 
 <body>
     <div class="toolbar no-print">
-        <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-back">← Kembali</a>
+        <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-back">Kembali</a>
         <button id="btn-thermal" class="btn btn-print" onclick="triggerReceiptPrint()">🖨️ Cetak</button>
     </div>
 
     <div class="receipt">
         <!-- Header -->
         <div class="text-center">
-            <div class="header-logo"><img src="/logo-sheza.png" alt="Sheza Laundry" style="max-width: 100px; height: auto;"></div>
+            <div class="header-logo"><img src="/logo-sheza-1bit.png" alt="Sheza Laundry"
+                    style="max-width: 100px; height: auto;"></div>
             <div class="header-title">SHEZA LAUNDRY SOLO</div>
             <div class="header-sub">
                 Jl. Pucangsawit RT 03 RW 03, Kecamatan Jebres, Kota Surakarta<br>
@@ -212,10 +213,13 @@
 
         <!-- Meta -->
         <div class="meta-row"><span class="meta-label">Order ID:</span><strong>{{ $order->order_number }}</strong></div>
-        <div class="meta-row"><span class="meta-label">Tanggal:</span><span>{{ $order->created_at->format('Y-m-d H:i') }}</span></div>
+        <div class="meta-row"><span
+                class="meta-label">Tanggal:</span><span>{{ $order->created_at->translatedFormat('d F Y H:i') }}</span>
+        </div>
         <div class="meta-row"><span class="meta-label">Kasir:</span><span>{{ $order->user?->name ?? 'Admin' }}</span>
         </div>
-        <div class="meta-row"><span class="meta-label">Pelanggan:</span><span>{{ strtoupper($order->member?->name ?? 'TAMU') }}</span></div>
+        <div class="meta-row"><span
+                class="meta-label">Pelanggan:</span><span>{{ strtoupper($order->member?->name ?? 'TAMU') }}</span></div>
 
         <div class="border-dash"></div>
 
@@ -226,7 +230,7 @@
                     <th class="td-name">ITEM</th>
                     <th class="td-qty">QTY</th>
                     <th class="td-unit">HARGA</th>
-                    <th class="td-amt">TOTAL</th>
+                    <th class="td-amt">SUBTOTAL</th>
                 </tr>
             </thead>
             <tbody>
@@ -256,9 +260,6 @@
         <div class="border-dash"></div>
 
         <!-- Totals -->
-        <div class="total-row"><span>Subtotal:</span><span>{{ number_format($order->subtotal, 0, ',', '.') }}</span>
-        </div>
-        <div class="border-dash"></div>
         <div class="total-row total-final"><span>TOTAL:</span><span>Rp
                 {{ number_format($order->total, 0, ',', '.') }}</span></div>
 
@@ -280,9 +281,9 @@
         <div class="footer-text">
             <strong>TERIMAKASIH</strong><br>
             Tidak Menerima Laundry Pakaian Dalam<br>
-            Menerima Laundry alat Gunung<br><br>
-            IG : ShezaLaundrySolo<br>
-            IG : Krabat adventure store
+            Menerima Laundry Alat Gunung<br><br>
+            IG : @sheza_laundrysolo<br>
+            IG : @krabatadventure
         </div>
         <div class="border-dash"></div>
         <div class="footer-brand" id="print-timestamp"></div>
@@ -292,21 +293,30 @@
 @php
     $receiptData = [
         'order_number' => $order->order_number,
-        'created_at' => $order->created_at->format('d/m/Y H:i'),
-        'finish_at' => $order->ready_at ? $order->ready_at->format('d/m/Y') : $order->created_at->addDays($order->is_express ? 1 : 3)->format('d/m/Y'),
+        'created_at' => $order->created_at->translatedFormat('d F Y H:i'),
+        'finish_at' => $order->ready_at
+            ? $order->ready_at->translatedFormat('d F Y')
+            : $order->created_at->addDays($order->is_express ? 1 : 3)->translatedFormat('d F Y'),
         'cashier' => $order->user?->name ?? 'Admin',
         'customer' => strtoupper($order->member?->name ?? 'TAMU'),
         'items' => $order->items
             ->map(function ($item) {
                 return [
                     'name' => $item->service_name,
-                    'qty' => $item->service_type === 'kiloan' ? ($item->weight ? $item->weight . 'kg' : '?kg') : intval($item->quantity) . 'x',
-                    'subtotal' => $item->service_type === 'kiloan' && !$item->weight ? 'TBD' : number_format($item->subtotal, 0, ',', '.'),
+                    'qty' =>
+                        $item->service_type === 'kiloan'
+                            ? ($item->weight
+                                ? $item->weight . 'kg'
+                                : '?kg')
+                            : intval($item->quantity) . 'x',
+                    'subtotal' =>
+                        $item->service_type === 'kiloan' && !$item->weight
+                            ? 'TBD'
+                            : number_format($item->subtotal, 0, ',', '.'),
                 ];
             })
             ->values()
             ->toArray(),
-        'subtotal' => number_format($order->subtotal, 0, ',', '.'),
         'total' => number_format($order->total, 0, ',', '.'),
         'payment_status' => $order->payment_status,
         'payment_method' => $order->payment_method ?? 'tunai',
@@ -325,7 +335,14 @@
         var yyyy = now.getFullYear();
         var hh = String(now.getHours()).padStart(2, '0');
         var min = String(now.getMinutes()).padStart(2, '0');
-        document.getElementById('print-timestamp').textContent = 'Dicetak: ' + dd + '/' + mm + '/' + yyyy + ' ' + hh + ':' + min;
+        var tsId = now.toLocaleString('id-ID', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).replace('.', ':');
+        document.getElementById('print-timestamp').textContent = 'Dicetak: ' + tsId;
     })();
 
     // ── ESC/POS builder (kertas 58mm = 32 karakter per baris) ────────────
@@ -371,14 +388,12 @@
         t += cols2('Pelanggan:', d.customer) + LF;
         t += SEP + LF;
         t += ESC + 'E\x01';
-        t += rpad('ITEM', 17) + rpad('QTY', 7) + lpad('TOTAL', 8) + LF;
+        t += rpad('ITEM', 17) + rpad('QTY', 7) + lpad('SUBTOTAL', 8) + LF;
         t += ESC + 'E\x00';
         for (var i = 0; i < d.items.length; i++) {
             var item = d.items[i];
             t += rpad(item.name, 17) + rpad(item.qty, 7) + lpad(item.subtotal, 8) + LF;
         }
-        t += SEP + LF;
-        t += cols2('Subtotal :', 'Rp ' + d.subtotal) + LF;
         t += SEP + LF;
         t += ESC + 'E\x01';
         t += cols2('TOTAL    :', 'Rp ' + d.total) + LF;
@@ -397,6 +412,77 @@
         t += LF + LF + LF;
         t += GS + 'V\x41\x03';
         return t;
+    }
+
+    function bytesToStr(bytes) {
+        var out = '';
+        for (var i = 0; i < bytes.length; i++) {
+            out += String.fromCharCode(bytes[i]);
+        }
+        return out;
+    }
+
+    function rasterizeToEscPos(img, maxWidth) {
+        var ratio = img.width > maxWidth ? (maxWidth / img.width) : 1;
+        var w = Math.max(1, Math.floor(img.width * ratio));
+        var h = Math.max(1, Math.floor(img.height * ratio));
+
+        var canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+
+        var ctx = canvas.getContext('2d', {
+            willReadFrequently: true
+        });
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+
+        var imageData = ctx.getImageData(0, 0, w, h).data;
+        var widthBytes = Math.ceil(w / 8);
+        var bytes = new Uint8Array(widthBytes * h);
+
+        for (var y = 0; y < h; y++) {
+            for (var x = 0; x < w; x++) {
+                var idx = (y * w + x) * 4;
+                var r = imageData[idx];
+                var g = imageData[idx + 1];
+                var b = imageData[idx + 2];
+                var lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                var isBlack = lum < 170;
+                if (isBlack) {
+                    var offset = y * widthBytes + (x >> 3);
+                    bytes[offset] |= (0x80 >> (x & 7));
+                }
+            }
+        }
+
+        var xL = widthBytes & 0xFF;
+        var xH = (widthBytes >> 8) & 0xFF;
+        var yL = h & 0xFF;
+        var yH = (h >> 8) & 0xFF;
+
+        return GS + 'v0' + String.fromCharCode(0, xL, xH, yL, yH) + bytesToStr(bytes);
+    }
+
+    function loadImage(src) {
+        return new Promise(function(resolve, reject) {
+            var img = new Image();
+            img.onload = function() {
+                resolve(img);
+            };
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
+
+    async function buildEscPosWithLogo(d, logoSrc) {
+        var logo = await loadImage(logoSrc);
+        var body = buildEscPos(d);
+        var header = ESC + '@' + ESC + 'a\x01';
+        var logoRaster = rasterizeToEscPos(logo, 192);
+        var spacing = LF + LF + ESC + 'a\x00';
+        return header + logoRaster + spacing + body;
     }
 
     function buildPlainText(d) {
@@ -436,14 +522,12 @@
         t += c2('Kasir    :', d.cashier) + '\n';
         t += c2('Pelanggan:', d.customer) + '\n';
         t += SEP + '\n';
-        t += rp('ITEM', 17) + rp('QTY', 7) + lp('TOTAL', 8) + '\n';
+        t += rp('ITEM', 17) + rp('QTY', 7) + lp('SUBTOTAL', 8) + '\n';
         t += SEP + '\n';
         for (var i = 0; i < d.items.length; i++) {
             var item = d.items[i];
             t += rp(item.name, 17) + rp(item.qty, 7) + lp(item.subtotal, 8) + '\n';
         }
-        t += SEP + '\n';
-        t += c2('Subtotal :', 'Rp ' + d.subtotal) + '\n';
         t += SEP + '\n';
         t += c2('TOTAL    :', 'Rp ' + d.total) + '\n';
         if (d.payment_status === 'lunas') {
@@ -454,30 +538,38 @@
         t += c2('Tgl Selesai:', d.finish_at) + '\n';
         t += SEP + '\n';
         t += center('TERIMAKASIH') + '\n';
-        t += center('Tdk Trima Laundry Pakaian Dlm') + '\n';
-        t += center('Menerima Laundry alat Gunung') + '\n';
-        t += center('IG : ShezaLaundrySolo') + '\n';
-        t += center('IG : Krabat adventure store') + '\n';
+        t += center('Tidak Menerima Laundry Pakaian Dalam') + '\n';
+        t += center('Menerima Laundry Alat Gunung') + '\n';
+        t += center('IG : @sheza_laundrysolo') + '\n';
+        t += center('IG : @krabatadventure') + '\n';
         t += SEP + '\n';
         var now = new Date();
-        var tsCetak = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear() + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        var tsCetak = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' +
+            now.getFullYear() + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(
+                2, '0');
         t += center('Dicetak: ' + tsCetak) + '\n';
         t += '\n\n\n';
         return t;
     }
 
-    function triggerReceiptPrint() {
+    async function triggerReceiptPrint() {
         var btn = document.getElementById('btn-thermal');
         var origHTML = btn.innerHTML;
 
-        // Kirim plain text ke RawBT — format yang benar dan langsung dicetak printer
-        var plainText = buildPlainText(RECEIPT);
-
         btn.disabled = true;
+        btn.textContent = 'Menyiapkan cetak...';
+
+        var payload;
+        try {
+            payload = await buildEscPosWithLogo(RECEIPT, '/logo-sheza-1bit.png');
+        } catch (e) {
+            payload = buildPlainText(RECEIPT);
+        }
+
         btn.textContent = 'Membuka RawBT...';
 
         var openedAt = Date.now();
-        window.location.href = 'rawbt:' + encodeURIComponent(plainText);
+        window.location.href = 'rawbt:' + encodeURIComponent(payload);
 
         // Jika setelah 2 detik halaman masih aktif, RawBT kemungkinan tidak terinstall
         setTimeout(function() {

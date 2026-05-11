@@ -85,8 +85,7 @@
                             class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold
           {{ match ($order->status) {
               'baru' => 'bg-blue-100 text-blue-700',
-              'dicuci' => 'bg-yellow-100 text-yellow-700',
-              'disetrika' => 'bg-orange-100 text-orange-700',
+              'dikerjakan' => 'bg-yellow-100 text-yellow-700',
               'siap_diambil' => 'bg-green-100 text-green-700',
               'selesai' => 'bg-gray-100 text-gray-600',
               default => 'bg-gray-100 text-gray-600',

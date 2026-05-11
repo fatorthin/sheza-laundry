@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Order;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -14,9 +15,9 @@ class WhatsAppService
 
     public function __construct()
     {
-        $this->baseUrl  = rtrim(config('services.whatsapp.url', ''), '/');
+        $this->baseUrl = rtrim(config('services.whatsapp.url', ''), '/');
         $this->basicAuth = config('services.whatsapp.basic_auth');
-        $this->deviceId  = config('services.whatsapp.device_id');
+        $this->deviceId = config('services.whatsapp.device_id');
     }
 
     /**
@@ -65,27 +66,15 @@ class WhatsAppService
         }
 
         try {
-            $headers = ['Content-Type' => 'application/json'];
-
-            if ($this->deviceId) {
-                $headers['X-Device-Id'] = $this->deviceId;
-            }
-
-            $request = Http::timeout(8)
-                ->withHeaders($headers);
-
-            if ($this->basicAuth) {
-                [$user, $pass] = explode(':', $this->basicAuth, 2);
-                $request = $request->withBasicAuth($user, $pass);
-            }
+            $request = $this->buildRequest(15, ['Content-Type' => 'application/json']);
 
             Log::info('WhatsAppService: sending message', [
-                'jid'     => $jid,
+                'jid' => $jid,
                 'gateway' => $this->baseUrl,
             ]);
 
             $response = $request->post("{$this->baseUrl}/send/message", [
-                'phone'   => $jid,
+                'phone' => $jid,
                 'message' => $message,
             ]);
 
@@ -96,7 +85,7 @@ class WhatsAppService
 
             Log::warning('WhatsAppService: gateway returned non-2xx', [
                 'status' => $response->status(),
-                'body'   => $response->body(),
+                'body' => $response->body(),
             ]);
 
             return false;
@@ -152,22 +141,18 @@ class WhatsAppService
         }
 
         try {
-            $headers = [];
-            if ($this->deviceId) {
-                $headers['X-Device-Id'] = $this->deviceId;
+            $binaryImage = base64_decode($imageBase64, true);
+            if ($binaryImage === false) {
+                Log::warning('WhatsAppService: invalid base64 payload for image', ['jid' => $jid]);
+                return false;
             }
 
-            $request = Http::timeout(30)->withHeaders($headers);
-
-            if ($this->basicAuth) {
-                [$user, $pass] = explode(':', $this->basicAuth, 2);
-                $request = $request->withBasicAuth($user, $pass);
-            }
+            $request = $this->buildRequest(45);
 
             $response = $request
-                ->attach('image', base64_decode($imageBase64), 'invoice.png', ['Content-Type' => 'image/png'])
+                ->attach('image', $binaryImage, 'invoice.png', ['Content-Type' => 'image/png'])
                 ->post("{$this->baseUrl}/send/image", [
-                    'phone'   => $jid,
+                    'phone' => $jid,
                     'caption' => $caption,
                 ]);
 
@@ -178,7 +163,7 @@ class WhatsAppService
 
             Log::warning('WhatsAppService: image send failed', [
                 'status' => $response->status(),
-                'body'   => $response->body(),
+                'body' => $response->body(),
             ]);
 
             return false;
@@ -200,21 +185,50 @@ class WhatsAppService
             . "Total tagihan: *{$total}*\n\n"
             . "Silakan datang ke toko kami. Nota/invoice terlampir. Terima kasih! 🙏";
 
-        $this->sendMessage($phone, $message);
+        $textSent = $this->sendMessage($phone, $message);
+        if (!$textSent) {
+            Log::warning('WhatsAppService: invoice flow stopped because text notification failed', [
+                'order_id' => $order->id,
+                'order_no' => $order->order_number,
+            ]);
+            return false;
+        }
 
         // 2. Invoice image
         try {
             /** @var InvoiceImageService $invoiceService */
             $invoiceService = app(InvoiceImageService::class);
-            $base64         = $invoiceService->generateBase64($order);
+            $base64 = $invoiceService->generateBase64($order);
 
             return $this->sendImage($phone, $base64, "Invoice – {$order->order_number}");
         } catch (\Throwable $e) {
             Log::error('WhatsAppService: invoice image generation failed', [
                 'order_id' => $order->id,
-                'error'    => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
             return false;
         }
+    }
+
+    /**
+     * Build a shared HTTP client config for WA gateway calls.
+     */
+    private function buildRequest(int $timeoutSeconds, array $headers = []): PendingRequest
+    {
+        if ($this->deviceId) {
+            $headers['X-Device-Id'] = $this->deviceId;
+        }
+
+        $request = Http::timeout($timeoutSeconds)
+            // Retry transient network issues (DNS/connect timeout) before failing.
+            ->retry(3, 750)
+            ->withHeaders($headers);
+
+        if ($this->basicAuth && str_contains($this->basicAuth, ':')) {
+            [$user, $pass] = explode(':', $this->basicAuth, 2);
+            $request = $request->withBasicAuth($user, $pass);
+        }
+
+        return $request;
     }
 }

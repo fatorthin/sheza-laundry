@@ -7,9 +7,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Sheza Laundry') – Admin</title>
     <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="icon" type="image/png" href="/logo-sheza.png">
+    <link rel="apple-touch-icon" href="/logo-sheza.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
@@ -50,8 +52,9 @@
                     @php $active = request()->routeIs($item['route']); @endphp
                     <a href="{{ route($item['route']) }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
-                          {{ $active ? 'bg-surface-container text-primary-container border-r-2 border-primary-container' : 'text-on-surface-variant hover:bg-surface-container hover:text-[#865300]' }}">
-                        <span class="material-symbols-outlined text-[20px] {{ $active ? 'filled' : '' }}">{{ $item['icon'] }}</span>
+                              {{ $active ? 'bg-surface-container text-primary-container border-r-2 border-primary-container' : 'text-on-surface-variant hover:bg-surface-container hover:text-[#865300]' }}">
+                        <span
+                            class="material-symbols-outlined text-[20px] {{ $active ? 'filled' : '' }}">{{ $item['icon'] }}</span>
                         {{ $item['label'] }}
                     </a>
                 @endforeach
@@ -59,13 +62,15 @@
 
             {{-- Footer --}}
             <div class="p-3 border-t border-outline-variant space-y-0.5">
-                <a href="{{ url('/') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-on-surface-variant hover:bg-surface-container hover:text-[#865300] transition-colors">
+                <a href="{{ url('/') }}"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-on-surface-variant hover:bg-surface-container hover:text-[#865300] transition-colors">
                     <span class="material-symbols-outlined text-[20px]">home</span>
                     Halaman Utama
                 </a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-on-surface-variant hover:bg-red-50 hover:text-red-600 transition-colors">
+                    <button type="submit"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-on-surface-variant hover:bg-red-50 hover:text-red-600 transition-colors">
                         <span class="material-symbols-outlined text-[20px]">logout</span>
                         Keluar
                     </button>
@@ -74,15 +79,19 @@
         </nav>
 
         {{-- Backdrop (mobile) --}}
-        <div class="fixed inset-0 z-40 bg-black/40 md:hidden" x-show="sidebarOpen" @click="sidebarOpen = false" x-transition:enter="transition-opacity duration-200" x-transition:leave="transition-opacity duration-200" style="display:none"></div>
+        <div class="fixed inset-0 z-40 bg-black/40 md:hidden" x-show="sidebarOpen" @click="sidebarOpen = false"
+            x-transition:enter="transition-opacity duration-200" x-transition:leave="transition-opacity duration-200"
+            style="display:none"></div>
 
         {{-- Main Content --}}
         <div class="flex-1 flex flex-col min-w-0 md:ml-64">
 
             {{-- TopBar --}}
-            <header class="h-16 flex items-center justify-between px-4 bg-white border-b border-outline-variant sticky top-0 z-30 shadow-sm">
+            <header
+                class="h-16 flex items-center justify-between px-4 bg-white border-b border-outline-variant sticky top-0 z-30 shadow-sm">
                 <div class="flex items-center gap-3">
-                    <button @click="sidebarOpen = !sidebarOpen" class="md:hidden p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+                    <button @click="sidebarOpen = !sidebarOpen"
+                        class="md:hidden p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
                         <span class="material-symbols-outlined">menu</span>
                     </button>
                     <span class="font-bold text-primary-container md:hidden">Sheza Laundry</span>
@@ -93,7 +102,8 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="text-sm text-on-surface-variant hidden md:block">{{ auth()->user()->name }}</span>
-                    <div class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-white font-bold text-sm">
+                    <div
+                        class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-white font-bold text-sm">
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
                 </div>
@@ -101,13 +111,15 @@
 
             {{-- Flash Messages --}}
             @if (session('success'))
-                <div class="mx-4 mt-4 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm flex items-center gap-2" x-data x-init="setTimeout(() => $el.remove(), 3000)">
+                <div class="mx-4 mt-4 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm flex items-center gap-2"
+                    x-data x-init="setTimeout(() => $el.remove(), 3000)">
                     <span class="material-symbols-outlined text-[18px]">check_circle</span>
                     {{ session('success') }}
                 </div>
             @endif
             @if (session('error'))
-                <div class="mx-4 mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-2" x-data x-init="setTimeout(() => $el.remove(), 4000)">
+                <div class="mx-4 mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-2"
+                    x-data x-init="setTimeout(() => $el.remove(), 4000)">
                     <span class="material-symbols-outlined text-[18px]">error</span>
                     {{ session('error') }}
                 </div>

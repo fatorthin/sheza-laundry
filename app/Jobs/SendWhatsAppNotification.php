@@ -33,7 +33,7 @@ class SendWhatsAppNotification implements ShouldQueue
 
     public function handle(WhatsAppService $wa): void
     {
-        match ($this->type) {
+        $sent = match ($this->type) {
             'status' => $wa->notifyOrderStatus(
                 $this->phone,
                 $this->data['order_number'],
@@ -48,7 +48,13 @@ class SendWhatsAppNotification implements ShouldQueue
                 $this->data['order_number'],
                 $this->data['payment_method'],
             ),
-            default => null,
+            default => true,
         };
+
+        if (!$sent) {
+            throw new \RuntimeException(
+                "WhatsApp notification failed (type={$this->type}, phone={$this->phone}). Job will be retried."
+            );
+        }
     }
 }

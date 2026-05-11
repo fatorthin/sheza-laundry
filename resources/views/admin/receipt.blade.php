@@ -550,7 +550,6 @@
             now.getFullYear() + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(
                 2, '0');
         t += center('Dicetak: ' + tsCetak) + '\n';
-        t += '\n\n\n';
         return t;
     }
 
@@ -579,7 +578,7 @@
             btn.innerHTML = origHTML;
 
             if (!document.hidden && Date.now() - openedAt < 3500) {
-                window.print();
+                // window.print();
             }
         }, 2000);
     }

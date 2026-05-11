@@ -145,22 +145,51 @@ class Pos extends Component
     {
         $this->validate([
             'newMemberName'  => 'required|min:2|max:100',
-            'newMemberPhone' => 'required|min:6|max:20|unique:members,phone',
+            'newMemberPhone' => 'required|min:6|max:20',
         ], [
             'newMemberName.required'  => 'Nama wajib diisi.',
             'newMemberName.min'       => 'Nama minimal 2 karakter.',
             'newMemberPhone.required' => 'No. HP wajib diisi.',
             'newMemberPhone.min'      => 'No. HP minimal 6 digit.',
-            'newMemberPhone.unique'   => 'No. HP sudah terdaftar.',
         ]);
+
+        $normalizedPhone = $this->normalizeIndonesianPhone($this->newMemberPhone);
+
+        if (!$normalizedPhone) {
+            $this->addError('newMemberPhone', 'Format No. HP tidak valid.');
+            return;
+        }
+
+        if (Member::where('phone', $normalizedPhone)->exists()) {
+            $this->addError('newMemberPhone', 'No. HP sudah terdaftar.');
+            return;
+        }
 
         $member = Member::create([
             'name'    => trim($this->newMemberName),
-            'phone'   => trim($this->newMemberPhone),
+            'phone'   => $normalizedPhone,
             'address' => trim($this->newMemberAddress) ?: null,
         ]);
 
         $this->selectMember($member->id);
+    }
+
+    private function normalizeIndonesianPhone(string $raw): ?string
+    {
+        $digits = preg_replace('/\D+/', '', $raw) ?? '';
+        if ($digits === '') {
+            return null;
+        }
+
+        if (str_starts_with($digits, '62')) {
+            $digits = '62' . ltrim(substr($digits, 2), '0');
+        } elseif (str_starts_with($digits, '0')) {
+            $digits = '62' . ltrim(substr($digits, 1), '0');
+        } else {
+            $digits = '62' . ltrim($digits, '0');
+        }
+
+        return strlen($digits) >= 9 ? $digits : null;
     }
 
     public function selectMember(int $memberId): void

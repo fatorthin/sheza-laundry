@@ -583,7 +583,16 @@
             var json = await response.json();
             if (!json || !json.file_url) throw new Error('Invalid save-escpos response');
 
-            btn.textContent = 'Mengunduh file .bin...';
+            btn.textContent = 'Mengunduh file cetak...';
+
+            if (json.logo_url) {
+                var logoA = document.createElement('a');
+                logoA.href = json.logo_url + '?t=' + Date.now();
+                logoA.download = 'logo-sheza-thermal.png';
+                document.body.appendChild(logoA);
+                logoA.click();
+                document.body.removeChild(logoA);
+            }
 
             var a = document.createElement('a');
             a.href = json.file_url + '?t=' + Date.now();
@@ -594,7 +603,8 @@
 
             setTimeout(function() {
                 alert(
-                    'File struk (.bin) sudah terunduh. Buka RawBT > Print from file/document > pilih file tersebut.');
+                    'Fallback aman aktif. File logo PNG dan struk .bin sudah terunduh.\n\nUrutan cetak di RawBT:\n1) Print from file/document -> pilih logo-sheza-thermal.png\n2) Print from file/document -> pilih file struk .bin'
+                    );
             }, 300);
 
         } catch (e) {

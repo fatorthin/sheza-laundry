@@ -32,11 +32,11 @@ class ReceiptController extends Controller
     }
 
     /**
-     * Build ESC/POS and save as downloadable .bin file.
+     * Build ESC/POS (text-only fallback) and save as downloadable .bin file.
      */
     public function saveEscPos(Order $order): JsonResponse
     {
-        $data = $this->buildEscPosBinary($order);
+        $data = $this->buildEscPosBinary($order, false);
 
         $dir = public_path('temp/escpos');
         if (! File::exists($dir)) {
@@ -54,15 +54,24 @@ class ReceiptController extends Controller
 
         File::put($filePath, $data);
 
+        $logoUrl = null;
+        foreach (['logo-sheza-1bit.png', 'logo-sheza_1bit.png', 'logo-sheza.png'] as $logoName) {
+            if (file_exists(public_path($logoName))) {
+                $logoUrl = url($logoName);
+                break;
+            }
+        }
+
         return response()->json([
             'ok' => true,
             'file_name' => $filename,
             'file_url' => url('temp/escpos/' . $filename),
+            'logo_url' => $logoUrl,
             'bytes' => strlen($data),
         ]);
     }
 
-    private function buildEscPosBinary(Order $order): string
+    private function buildEscPosBinary(Order $order, bool $includeLogo = true): string
     {
         $order->load(['member', 'items.service', 'user']);
 
@@ -97,59 +106,61 @@ class ReceiptController extends Controller
         $data .= $ESC . '@';
         $data .= $ESC . 'a' . "\x01";
 
-        // ── Logo raster ────────────────────────────────────────────────
-        $logoPath = public_path('logo-sheza-1bit.png');
-        if (file_exists($logoPath)) {
-            $img = @imagecreatefrompng($logoPath);
-            if ($img) {
-                $origW = imagesx($img);
-                $origH = imagesy($img);
-                // Use 192px for clearer logo on 58mm paper.
-                $maxW  = 192;
-                $ratio = $origW > $maxW ? $maxW / $origW : 1.0;
-                $w     = max(1, (int) floor($origW * $ratio));
-                $h     = max(1, (int) floor($origH * $ratio));
+        // ── Logo raster (optional) ─────────────────────────────────────
+        if ($includeLogo) {
+            $logoPath = public_path('logo-sheza-1bit.png');
+            if (file_exists($logoPath)) {
+                $img = @imagecreatefrompng($logoPath);
+                if ($img) {
+                    $origW = imagesx($img);
+                    $origH = imagesy($img);
+                    // Use 192px for clearer logo on 58mm paper.
+                    $maxW  = 192;
+                    $ratio = $origW > $maxW ? $maxW / $origW : 1.0;
+                    $w     = max(1, (int) floor($origW * $ratio));
+                    $h     = max(1, (int) floor($origH * $ratio));
 
-                $thumb = imagecreatetruecolor($w, $h);
-                imagefill($thumb, 0, 0, imagecolorallocate($thumb, 255, 255, 255));
-                imagecopyresampled($thumb, $img, 0, 0, 0, 0, $w, $h, $origW, $origH);
-                imagedestroy($img);
+                    $thumb = imagecreatetruecolor($w, $h);
+                    imagefill($thumb, 0, 0, imagecolorallocate($thumb, 255, 255, 255));
+                    imagecopyresampled($thumb, $img, 0, 0, 0, 0, $w, $h, $origW, $origH);
+                    imagedestroy($img);
 
-                $pixels = array_fill(0, $h, array_fill(0, $w, 0));
-                for ($y = 0; $y < $h; $y++) {
-                    for ($x = 0; $x < $w; $x++) {
-                        $rgb = imagecolorat($thumb, $x, $y);
-                        $r   = ($rgb >> 16) & 0xFF;
-                        $g   = ($rgb >>  8) & 0xFF;
-                        $b   = $rgb         & 0xFF;
-                        $lum = 0.299 * $r + 0.587 * $g + 0.114 * $b;
-                        $pixels[$y][$x] = $lum < 150 ? 1 : 0;
-                    }
-                }
-                imagedestroy($thumb);
-
-                // ESC * (24-dot double density) is usually more compatible than GS v 0.
-                $nL = $w & 0xFF;
-                $nH = ($w >> 8) & 0xFF;
-                $data .= $ESC . '3' . chr(24);
-                for ($y = 0; $y < $h; $y += 24) {
-                    $data .= $ESC . '*' . chr(33) . chr($nL) . chr($nH);
-                    for ($x = 0; $x < $w; $x++) {
-                        for ($k = 0; $k < 3; $k++) {
-                            $byte = 0;
-                            for ($b = 0; $b < 8; $b++) {
-                                $yy = $y + ($k * 8) + $b;
-                                if ($yy < $h && $pixels[$yy][$x] === 1) {
-                                    $byte |= (0x80 >> $b);
-                                }
-                            }
-                            $data .= chr($byte);
+                    $pixels = array_fill(0, $h, array_fill(0, $w, 0));
+                    for ($y = 0; $y < $h; $y++) {
+                        for ($x = 0; $x < $w; $x++) {
+                            $rgb = imagecolorat($thumb, $x, $y);
+                            $r   = ($rgb >> 16) & 0xFF;
+                            $g   = ($rgb >>  8) & 0xFF;
+                            $b   = $rgb         & 0xFF;
+                            $lum = 0.299 * $r + 0.587 * $g + 0.114 * $b;
+                            $pixels[$y][$x] = $lum < 150 ? 1 : 0;
                         }
                     }
+                    imagedestroy($thumb);
+
+                    // ESC * (24-dot double density) is usually more compatible than GS v 0.
+                    $nL = $w & 0xFF;
+                    $nH = ($w >> 8) & 0xFF;
+                    $data .= $ESC . '3' . chr(24);
+                    for ($y = 0; $y < $h; $y += 24) {
+                        $data .= $ESC . '*' . chr(33) . chr($nL) . chr($nH);
+                        for ($x = 0; $x < $w; $x++) {
+                            for ($k = 0; $k < 3; $k++) {
+                                $byte = 0;
+                                for ($b = 0; $b < 8; $b++) {
+                                    $yy = $y + ($k * 8) + $b;
+                                    if ($yy < $h && $pixels[$yy][$x] === 1) {
+                                        $byte |= (0x80 >> $b);
+                                    }
+                                }
+                                $data .= chr($byte);
+                            }
+                        }
+                        $data .= $LF;
+                    }
+                    $data .= $ESC . '2';
                     $data .= $LF;
                 }
-                $data .= $ESC . '2';
-                $data .= $LF;
             }
         }
 

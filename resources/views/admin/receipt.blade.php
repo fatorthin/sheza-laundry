@@ -200,7 +200,7 @@
     <div class="receipt">
         <!-- Header -->
         <div class="text-center">
-            <div class="header-logo"><img src="/logo-sheza-1bit.png" alt="Sheza Laundry"
+            <div class="header-logo"><img src="/logo-sheza_1bit.png" alt="Sheza Laundry"
                     style="max-width: 100px; height: auto;"></div>
             <div class="header-title">SHEZA LAUNDRY SOLO</div>
             <div class="header-sub">

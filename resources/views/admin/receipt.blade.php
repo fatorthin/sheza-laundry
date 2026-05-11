@@ -481,6 +481,10 @@
     async function buildEscPosWithLogo(d, logoSrc) {
         var logo = await loadImage(logoSrc);
         var body = buildEscPos(d);
+        // Strip the leading ESC @ reset so it doesn't clear the logo already queued
+        if (body.charCodeAt(0) === 0x1B && body.charAt(1) === '@') {
+            body = body.slice(2);
+        }
         var header = ESC + '@' + ESC + 'a\x01';
         var logoRaster = rasterizeToEscPos(logo, 192);
         var spacing = LF + LF + ESC + 'a\x00';

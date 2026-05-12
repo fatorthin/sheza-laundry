@@ -110,7 +110,7 @@
                                 @if ($item->service_type === 'kiloan')
                                     @if ((float) ($item->weight ?? 0) > 0)
                                         <p class="text-xs text-on-surface-variant">
-                                            {{ number_format($item->weight, 2, ',', '.') }}kg
+                                            {{ number_format($item->weight, 3, ',', '.') }}kg
                                             × Rp {{ number_format($item->price, 0, ',', '.') }}/kg</p>
                                     @else
                                         <p class="text-xs text-primary-container">Rp
@@ -177,7 +177,7 @@
                             <template x-if="selectedSvc && selectedSvc.type === 'kiloan'">
                                 <div>
                                     <label class="block text-xs font-medium text-on-surface-variant mb-1">Berat (kg)</label>
-                                    <input type="number" name="weight" step="0.1" min="0" placeholder="0.0"
+                                    <input type="number" name="weight" step="0.001" min="0" placeholder="0.000"
                                         class="w-full border border-outline-variant rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container">
                                     <p class="text-xs text-on-surface-variant mt-1">Kosongkan jika berat belum diketahui.
                                     </p>
@@ -221,7 +221,7 @@
                                     <div>
                                         <label class="block text-xs font-medium text-on-surface-variant mb-1">Berat
                                             (kg)</label>
-                                        <input type="number" name="weight" step="0.1" min="0"
+                                        <input type="number" name="weight" step="0.001" min="0"
                                             :value="editItem.weight"
                                             class="w-full border border-outline-variant rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container">
                                     </div>
@@ -262,7 +262,7 @@
                         menghitung total.</p>
                     <form method="POST" action="{{ route('admin.orders.weight', $order) }}" class="flex gap-2">
                         @csrf
-                        <input type="number" name="weight" step="0.1" min="0.1" placeholder="Berat (kg)"
+                        <input type="number" name="weight" step="0.001" min="0.001" placeholder="Berat (kg)"
                             class="flex-1 border border-orange-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container">
                         <button type="submit"
                             class="px-4 py-2 bg-primary-container text-white rounded-xl text-sm font-medium">Simpan</button>

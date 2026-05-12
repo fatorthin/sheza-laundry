@@ -28,7 +28,7 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'weight'      => 'decimal:2',
+        'weight'      => 'decimal:3',
         'subtotal'    => 'decimal:2',
         'tax'         => 'decimal:2',
         'total'       => 'decimal:2',

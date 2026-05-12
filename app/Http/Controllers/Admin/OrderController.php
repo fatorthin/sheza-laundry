@@ -54,7 +54,7 @@ class OrderController extends Controller
     public function finalizeWeight(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'weight' => 'required|numeric|min:0.1',
+            'weight' => 'required|numeric|min:0.001',
         ]);
 
         $weight = (float) $validated['weight'];

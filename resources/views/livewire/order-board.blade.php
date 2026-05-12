@@ -315,7 +315,7 @@
                         <div class="grid grid-cols-2 gap-3 items-end">
                             <div>
                                 <label class="text-[10px] text-on-surface-variant block mb-1">Berat (kg)</label>
-                                <input type="number" step="0.1" min="0"
+                                <input type="number" step="0.001" min="0"
                                     x-model="kiloanItems[index].weight" @input="calcTotals()"
                                     class="w-full border border-outline-variant rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-primary-container focus:outline-none bg-white">
                             </div>
